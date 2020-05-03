@@ -49,8 +49,7 @@ export const TopNav = () => {
 			<div>
 				<div className="d-flex align-items-center">
 					<a href="/" className="navbar-brand">
-						<i className="fas fa-campground mr-2"></i>
-						Tribewatch
+						Dayoff
 					</a>
 					<div>
 						{location && (

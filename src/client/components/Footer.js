@@ -9,13 +9,13 @@ export const Footer = () => {
 				<div className="row">
 					<div className="col-md-6">
 						<a href="/" className="footer-logo">
-							<i className="fas fa-campground mr-2"></i>Tribewatch
+							Dayoff
 						</a>
 					</div>
 					<div className="col-md-6 right-col">
 						<ul>
 							<li>
-								© 2020 <a href="/"> Tribewatch</a>
+								© 2020 <a href="/"> Dayoff</a>
 							</li>
 							<li>
 								<a href="/privacy">Privacy Policy</a>

@@ -14,8 +14,8 @@ export const Login = ({ handleClose }) => {
 		// Popup signin flow rather than redirect flow.
 		signInFlow: 'popup',
 		// We will display Google and Facebook as auth providers.
-		signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID, firebase.auth.FacebookAuthProvider.PROVIDER_ID],
-		// firebase.auth.GoogleAuthProvider.PROVIDER_ID, firebase.auth.FacebookAuthProvider.PROVIDER_ID],
+		// signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID, firebase.auth.FacebookAuthProvider.PROVIDER_ID],
+		signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
 		callbacks: {
 			// Avoid redirects after sign-in.
 			signInSuccessWithAuthResult: (authResult, redirectUrl) => {
@@ -40,8 +40,8 @@ export const Login = ({ handleClose }) => {
 	return (
 		<Container className="login">
 			<div className="text-center mb-4">
-				<h2>Tribewatch Login</h2>
-				<p>This is just to make sure you're not a mutant.</p>
+				<h2>Dayoff Login</h2>
+				<p>Only for verification purposes. Your data is never shared.</p>
 			</div>
 			<StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />
 		</Container>
