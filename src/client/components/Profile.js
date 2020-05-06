@@ -1,111 +1,137 @@
 import React, { useContext, useReducer, useState, useEffect } from 'react';
 
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
-import { Formik } from 'formik';
-import { firebaseAuth, firebaseDb } from '../services/firebase';
+import { useFormik } from 'formik';
+import { firebaseDb } from '../services/firebase';
 import { UserContext } from '../context/UserContext';
 import { states } from './admin/states';
+import { getPrefCategory } from '../utils/User';
+const moment = require('moment');
+
+const genders = ['Male', 'Female'];
+const preferences = ['Male', 'Female'];
 
 export const Profile = () => {
 	const [{ user, profile }, userDispatch] = useContext(UserContext);
 
-	const initFields = {
-		...profile
+	const preferenceLabel = (field, pref, index) => {
+		return (
+			<Form.Label key={index}>
+				<Button
+					variant={values.preference === pref ? 'primary' : 'primary-outline'}
+					checked={values.preference === pref}
+					onClick={() => setFieldValue(field, pref)}
+				>
+					{pref}
+				</Button>
+			</Form.Label>
+		);
 	};
+
+	const validate = (values) => {
+		const errors = {};
+		if (!values.displayName) {
+			errors.displayName = 'Required';
+		}
+		if (!values.gender) {
+			errors.gender = 'Required';
+		}
+		if (!values.location) {
+			errors.location = 'Required';
+		}
+		if (!values.preference) {
+			errors.preference = 'Required';
+		}
+
+		return errors;
+	};
+
+	const initialValues = user
+		? {
+				displayName: user.displayName,
+				gender: user.gender,
+				location: user.location,
+				preference: user.preference,
+		  }
+		: {
+				displayName: '',
+				gender: '',
+				location: '',
+				preference: '',
+		  };
+	const formik = useFormik({
+		initialValues,
+		validate,
+		onSubmit: async (values) => {
+			if (!user) {
+				userDispatch({
+					type: 'SHOW_LOGIN',
+					showLogin: true,
+				});
+			} else {
+				const unix = moment().unix();
+				const prefCategory = getPrefCategory(values);
+				const payload = {
+					...values,
+					uid: user.uid,
+					modified: values.time || unix,
+					photoURL: user.photoURL,
+					prefCategory,
+				};
+				await firebaseDb.ref(`user/${user.uid}`).set(payload);
+			}
+		},
+		enableReinitialize: true,
+	});
+	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
+	// console.log('values: ', values);
 
 	return (
 		<div>
-			<h2>Profile</h2>
-			<Formik
-				initialValues={initFields}
-				validate={values => {
-					const errors = {};
-					if (!values.name) {
-						errors.name = 'Required';
-					}
-					return errors;
-				}}
-				onSubmit={async (values, { setSubmitting }) => {
-					const newProfile = {
-						name: values.name,
-						address: values.address,
-						address2: values.address2 || null,
-						city: values.city,
-						state: values.state
-					};
-					await firebaseDb.ref(`users/${user.uid}/profile`).set(newProfile);
+			<h3>Set your profile.</h3>
 
-					userDispatch({
-						type: 'SET_PROFILE',
-						profile: newProfile
-					});
-				}}
-			>
-				{({
-					values,
-					errors,
-					touched,
-					handleChange,
-					handleBlur,
-					handleSubmit,
-					isSubmitting
-					/* and other goodies */
-				}) => (
-					<Form onSubmit={handleSubmit}>
-						<Form.Group>
-							<Form.Label>Display Name</Form.Label>
-							<Form.Control type="text" placeholder="Display Name" name="name" onChange={handleChange} />
-							{errors.name && touched.name && errors.name}
-						</Form.Group>
-						<div>
-							Your address is optional and will never be made public. It will only be revealed to drivers
-							you accept to receive an order from.
-						</div>
-						<Form.Group>
-							<Form.Label>Address</Form.Label>
-							<Form.Control
-								type="text"
-								placeholder="1234 Main St"
-								name="address"
-								onChange={handleChange}
-							/>
-							{errors.address && touched.address && errors.address}
-						</Form.Group>
-						<Form.Group>
-							<Form.Label>Address 2</Form.Label>
-							<Form.Control type="text" placeholder="Apt. 5" name="address2" onChange={handleChange} />
-							{errors.address2 && touched.address2 && errors.address2}
-						</Form.Group>
+			<div>
+				<Form onSubmit={handleSubmit}>
+					<Form.Group>
+						<Form.Label>Name</Form.Label>
+						<Form.Control
+							type="text"
+							name="displayName"
+							onChange={handleChange}
+							value={values.displayName}
+						/>
+						{errors.displayName && touched.displayName && errors.displayName}
+					</Form.Group>
+
+					<Form.Group>
+						<Form.Label>Gender</Form.Label>
+						<Form.Row>{genders.map((gender, index) => preferenceLabel('gender', gender, index))}</Form.Row>
+					</Form.Group>
+
+					<Form.Group>
+						<Form.Label>Location</Form.Label>
+						<Form.Control type="text" name="location" onChange={handleChange} value={values.location} />
+						{errors.location && touched.location && errors.location}
+					</Form.Group>
+
+					<Form.Group>
+						<Form.Label>Preference</Form.Label>
 						<Form.Row>
-							<Form.Group>
-								<Form.Label>City</Form.Label>
-								<Form.Control type="text" name="city" onChange={handleChange} />
-								{errors.city && touched.city && errors.city}
-							</Form.Group>
-							<Form.Group>
-								<Form.Label>State</Form.Label>
-								<Form.Control as="select" onChange={handleChange} name="state">
-									<option key="selectState" value="">
-										Select State
-									</option>
-									{Object.entries(states).map(([abr, name]) => {
-										return (
-											<option key={abr} value={abr}>
-												{name}
-											</option>
-										);
-									})}
-								</Form.Control>
-								{errors.state && touched.state && errors.state}
-							</Form.Group>
+							{preferences.map((preference, index) => preferenceLabel('preference', preference, index))}
 						</Form.Row>
+					</Form.Group>
 
-						<Button type="submit" disabled={isSubmitting}>
-							Save Profile
-						</Button>
-					</Form>
-				)}
-			</Formik>
+					<Form.Group>
+						<Form.Label>Facebook URL</Form.Label>
+						<Form.Control type="text" name="facebook" onChange={handleChange} value={values.facebook} />
+						{errors.facebook && touched.facebook && errors.facebook}
+					</Form.Group>
+
+					<Button variant="outline-primary" type="submit" disabled={isSubmitting}>
+						Post
+					</Button>
+				</Form>
+			</div>
 		</div>
 	);
 };

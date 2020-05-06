@@ -4,14 +4,14 @@ import App from './App';
 
 import { UserContextProvider } from './context/UserContext';
 import { AdminContextProvider } from './context/AdminContext';
-import { ShopperContextProvider } from './context/ShopperContext';
+import { StatusContextProvider } from './context/StatusContext';
 
 ReactDOM.render(
 	<UserContextProvider>
 		<AdminContextProvider>
-			<ShopperContextProvider>
+			<StatusContextProvider>
 				<App />
-			</ShopperContextProvider>
+			</StatusContextProvider>
 		</AdminContextProvider>
 	</UserContextProvider>,
 	document.getElementById('root')

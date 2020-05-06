@@ -4,13 +4,10 @@ export const UserContext = React.createContext();
 
 const initialUser = {
 	user: null,
-	location: null,
 	preferences: null,
 	profile: null,
-	storeList: null,
 	favorites: [],
 	tutorial: null,
-	featuredStores: null,
 	showLogin: false,
 	inbox: null,
 };
@@ -21,12 +18,6 @@ const UserReducer = (state, action) => {
 			return {
 				...state,
 				user: action.user,
-			};
-
-		case 'SET_LOCATION':
-			return {
-				...state,
-				location: action.location,
 			};
 
 		case 'SET_PREFERENCES':
@@ -57,12 +48,6 @@ const UserReducer = (state, action) => {
 			return {
 				...state,
 				tutorial: action.tutorial,
-			};
-
-		case 'SET_FEATURED_STORES':
-			return {
-				...state,
-				featuredStores: action.featuredStores,
 			};
 
 		case 'SHOW_LOGIN':

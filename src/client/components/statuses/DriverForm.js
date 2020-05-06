@@ -34,8 +34,8 @@ export const DriverForm = () => {
 		if (!values.contactLink) {
 			errors.contactLink = 'Required';
 		}
-		// if (!values.entry) {
-		// 	errors.entry = 'Required';
+		// if (!values.status) {
+		// 	errors.status = 'Required';
 		// }
 		return errors;
 	};
@@ -123,12 +123,12 @@ export const DriverForm = () => {
 						<Form.Label>Your shopping request</Form.Label>
 						<ReactQuill
 							theme="bubble"
-							name="entry"
-							value={values.entry || ''}
-							onChange={(e) => setFieldValue('entry', e)}
+							name="status"
+							value={values.status || ''}
+							onChange={(e) => setFieldValue('status', e)}
 							placeholder={`Hi ${location.city}! I need a shopper!`}
 						/>
-						{errors.entry && touched.entry && errors.entry}
+						{errors.status && touched.status && errors.status}
 					</Form.Group> */}
 					<Button variant="outline-primary" type="submit" disabled={isSubmitting}>
 						Publish

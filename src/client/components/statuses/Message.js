@@ -2,26 +2,26 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Image, Row, Col, Badge, Form, Button, Modal } from 'react-bootstrap';
 import { firebaseDb } from '../../services/firebase';
 import { UserContext } from '../../context/UserContext';
-import { ShopperContext } from '../../context/ShopperContext';
+import { StatusContext } from '../../context/StatusContext';
 import { useFormik } from 'formik';
 import { map } from 'lodash';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 const moment = require('moment');
 
-export const Message = ({ entry }) => {
+export const Message = ({ status }) => {
 	const [{ user, location, inbox }, userDispatch] = useContext(UserContext);
-	// const [{ user, location, inbox }, shopperDispatch] = useContext(UserContext);
+	// const [{ user, location, inbox }, statusDispatch] = useContext(UserContext);
 	const [messages, setMessages] = useState();
 	const [convoRef, setConvoRef] = useState();
 	const [otherUid, setOtherUid] = useState();
 
 	const getConvo = async () => {
-		// Check if entry is already in your inbox
+		// Check if status is already in your inbox
 		let existingConvoRef = null;
-		if (inbox && entry) {
+		if (inbox && status) {
 			inbox.map((subscription) => {
-				if (subscription.entryUid === entry.uid) {
+				if (subscription.statusUid === status.uid) {
 					existingConvoRef = subscription.convoRef;
 				}
 			});
@@ -37,7 +37,7 @@ export const Message = ({ entry }) => {
 				}
 			});
 			// Also delete the messageInbox for your user (or set to read)
-			const inboxMsg = inbox.find((x) => x.entryUid === entry.uid);
+			const inboxMsg = inbox.find((x) => x.statusUid === status.uid);
 			console.log('inboxMsg to delete: ', inboxMsg);
 			if (inboxMsg) {
 				firebaseDb.ref(`messageInbox/${location.collectionId}/${user.uid}/${inboxMsg.key}`).set({
@@ -60,7 +60,7 @@ export const Message = ({ entry }) => {
 	useEffect(() => {
 		getConvo();
 
-		if (entry.uid === user.uid) {
+		if (status.uid === user.uid) {
 			// this is
 		}
 	}, []);
@@ -89,7 +89,7 @@ export const Message = ({ entry }) => {
 				const unix = moment().unix();
 				const payload = {
 					...values,
-					entryUid: entry.uid,
+					statusUid: status.uid,
 					uid: user.uid,
 					displayName: user.displayName,
 					time: unix,
@@ -101,7 +101,7 @@ export const Message = ({ entry }) => {
 				const subscriptionPayload = {
 					convoRef,
 					lastUid: user.uid, // inverse uid
-					entryUid: entry.uid,
+					statusUid: status.uid,
 					lastMessage: values.message,
 					displayName: user.displayName,
 					time: unix,
@@ -118,20 +118,20 @@ export const Message = ({ entry }) => {
 	});
 	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
 
-	const displayInitialEntry = () => {
-		if (!entry) {
+	const displayInitialstatus = () => {
+		if (!status) {
 			return null;
 		}
-		const timeDisplay = moment.unix(entry.time).fromNow();
-		if (entry.uid === user.uid) {
+		const timeDisplay = moment.unix(status.time).fromNow();
+		if (status.uid === user.uid) {
 			// Float right
 			return (
 				<div className="message d-flex flex-column align-items-end">
 					<div className="message-content right mb-1">
-						<ReactQuill value={entry.entry} readOnly={true} theme={'bubble'} />
+						<ReactQuill value={status.status} readOnly={true} theme={'bubble'} />
 					</div>
 					<div className="message-byline">
-						{entry.displayName} {timeDisplay}
+						{status.displayName} {timeDisplay}
 					</div>
 				</div>
 			);
@@ -139,10 +139,10 @@ export const Message = ({ entry }) => {
 			return (
 				<div className="message d-flex flex-column align-items-start">
 					<div className="message-content mb-1">
-						<ReactQuill value={entry.entry} readOnly={true} theme={'bubble'} />
+						<ReactQuill value={status.status} readOnly={true} theme={'bubble'} />
 					</div>
 					<div className="message-byline">
-						{entry.displayName} {timeDisplay}
+						{status.displayName} {timeDisplay}
 					</div>
 				</div>
 			);
@@ -174,21 +174,21 @@ export const Message = ({ entry }) => {
 	};
 
 	const placeholder = () => {
-		if (!entry) {
+		if (!status) {
 			return null;
 		}
-		if (entry.uid === user.uid) {
-			// Your entry
+		if (status.uid === user.uid) {
+			// Your status
 			return '';
 		} else {
-			return `Hi ${entry.displayName}, I can help with your list!`;
+			return `Hi ${status.displayName}, I can help with your list!`;
 		}
 	};
 
 	return (
 		<Col>
 			<div className="mb-3">
-				{displayInitialEntry()}
+				{displayInitialstatus()}
 				{messages &&
 					messages.map((message, i) => {
 						return (

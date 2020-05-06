@@ -1,79 +1,80 @@
 import React, { useState, useEffect, useContext } from 'react';
-
 import { UserContext } from '../context/UserContext';
-import { Container, Row, Col, Modal } from 'react-bootstrap';
-import { LocationSelection } from './LocationSelection';
-import { SuggestCity } from './SuggestCity';
-import { Stores } from './stores';
+import { StatusContext } from '../context/StatusContext';
+import { Image, Row, Col, Badge, Container, Form, Button, Modal } from 'react-bootstrap';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.bubble.css';
+import { RequestForm } from './statuses/RequestForm';
+import { getProfile } from '../actions/User';
 
-export const Dashboard = (props) => {
-	const [{ user, location }, userDispatch] = useContext(UserContext);
-	const [showLocationModal, setLocationModal] = useState();
-	const [selectedState, setSelectedState] = useState();
-	const [showLogin, setShowLogin] = useState();
+import { firebaseDb } from '../services/firebase';
+import { map } from 'lodash';
 
-	const handleLocationClose = (location) => {
-		setLocationModal(null);
-	};
+const moment = require('moment');
 
-	if (!location) {
+export const Dashboard = () => {
+	const [{ user, location, profile }, userDispatch] = useContext(UserContext);
+	const [{ statuses, status }, statusDispatch] = useContext(StatusContext);
+	const [tab, setTab] = useState('driver');
+
+	useEffect(() => {
+		if (user && !profile) {
+			getProfile(user);
+		}
+	}, [user, profile]);
+
+	const contactButton = (shopperstatus) => {
+		if (user && shopperstatus.uid === user.uid) {
+			return null;
+		}
 		return (
-			<Container>
-				<div className="text-center mb-4">
-					<div className="icons h2 mb-4">
-						<i className="fas fa-pump-soap mr-4 pr-2"></i>
-						<i className="fas fa-toilet-paper"></i>
-						<i className="fas fa-thermometer-half ml-4 pl-2"></i>
-					</div>
-					<h2 style={{ lineHeight: '1.5' }}>
-						Real-time reporting
-						<br />
-						of <em>essential items</em>
-						<br />
-						in your community.
-					</h2>
-					<div></div>
-				</div>
-				<Row>
-					<Col className="d-flex flex-column align-items-center">
-						<div>
-							<LocationSelection
-								handleClose={handleLocationClose}
-								onSelectState={(state) => setSelectedState(state)}
-							/>
-						</div>
-						<div className="mb-4">
-							<a onClick={() => userDispatch({ type: 'SHOW_LOGIN', showLogin: true })}>
-								Already have a login?
-							</a>
-						</div>
-						{selectedState && (
-							<div>
-								<SuggestCity state={selectedState} />
-							</div>
-						)}
-					</Col>
-				</Row>
-			</Container>
+			<a onClick={() => statusDispatch({ type: 'SET_STATUS', status: shopperstatus })}>
+				<Badge variant="secondary">Message</Badge>
+			</a>
 		);
-	}
+	};
 
 	return (
 		<Container>
-			<div className="location-header mb-3">
-				<h2>
-					<span>Stores in </span>
-					{`${location.city}, ${location.state}`}
-				</h2>
-				{/* {preferences.canDrive && (
-					<Badge variant="light" className="ml-3">
-						<i className="fas fa-car" /> Driver
-					</Badge>
-				)} */}
-			</div>
-			<div>
-				<Stores />
-			</div>
+			<Row>
+				<Col>
+					<RequestForm />
+				</Col>
+				<Col className="ml-4">
+					<div>
+						{statuses &&
+							statuses.map((shopperstatus, i) => {
+								const displayDate = moment(shopperstatus.unix).fromNow();
+
+								return (
+									<Row key={i}>
+										<div className="mr-4">
+											<Image roundedCircle src={shopperstatus.photoURL} style={{ width: 50 }} />
+										</div>
+										<div>
+											<Row>
+												<Col>
+													<h5>{shopperstatus.displayName}</h5>
+													{contactButton(shopperstatus)}
+												</Col>
+												<div>
+													<h5>
+														<i>{displayDate}</i>
+													</h5>
+													<ReactQuill
+														value={shopperstatus.status}
+														readOnly={true}
+														theme={'bubble'}
+													/>
+												</div>
+											</Row>
+										</div>
+									</Row>
+								);
+							})}
+					</div>
+				</Col>
+			</Row>
 		</Container>
 	);
 };

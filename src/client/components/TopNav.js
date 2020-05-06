@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import { UserContext } from '../context/UserContext';
-import { ShopperContext } from '../context/ShopperContext';
+import { StatusContext } from '../context/StatusContext';
 import { Nav, Navbar, NavDropdown, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 import { LocationSelection } from './LocationSelection';
@@ -12,14 +12,10 @@ import { firebaseAuth, firebaseDb } from '../services/firebase';
 
 export const TopNav = () => {
 	const [{ user, location, inbox }, userDispatch] = useContext(UserContext);
-	const [{ shopEntries }, shopperDispatch] = useContext(ShopperContext);
+	const [{ statuses }, statusDispatch] = useContext(StatusContext);
 	console.log('inbox at topNav: ', inbox);
 	const [showLocationModal, setLocationModal] = useState();
 	const [selectedState, setSelectedState] = useState();
-
-	const listenForMessages = async () => {
-		firebaseDb.ref(`messages/${location.collectionId}/`);
-	};
 
 	const handleLocationClose = (location) => {
 		setLocationModal(null);
@@ -51,16 +47,6 @@ export const TopNav = () => {
 					<a href="/" className="navbar-brand">
 						Dayoff
 					</a>
-					<div>
-						{location && (
-							<h6 className="mb-0">
-								{`${location.city}, ${location.state}`}
-								<a role="button" onClick={() => setLocation()} className="ml-3">
-									<i className="mr-2 fas fa-map-marker-alt"></i>Change Location
-								</a>
-							</h6>
-						)}
-					</div>
 				</div>
 			</div>
 		);
@@ -69,11 +55,11 @@ export const TopNav = () => {
 	const inboxOverlay = () => {
 		const selectMsg = async (inboxMsg) => {
 			console.log('inboxMsg: ', inboxMsg);
-			const foundEntry = shopEntries.find((x) => x.uid === inboxMsg.entryUid);
-			if (!foundEntry) {
-				console.log('Could not find this entry!');
+			const foundstatus = statuses.find((x) => x.uid === inboxMsg.statusUid);
+			if (!foundstatus) {
+				console.log('Could not find this status!');
 			} else {
-				shopperDispatch({ type: 'SET_ENTRY', entry: foundEntry });
+				statusDispatch({ type: 'SET_STATUS', status: foundstatus });
 			}
 			// const resp = await firebaseDb.ref(`shopping/${location.collectionId}/${inboxMsg.convoRef}`);
 		};
@@ -117,10 +103,10 @@ export const TopNav = () => {
 		return (
 			<Navbar expand="lg">
 				<div className="container">
-					{defaultNav()}
 					<Nav className="mr-3">
 						<a onClick={() => userDispatch({ type: 'SHOW_LOGIN', showLogin: true })}>Login</a>
 					</Nav>
+					{defaultNav()}
 				</div>
 			</Navbar>
 		);
@@ -130,7 +116,6 @@ export const TopNav = () => {
 		return (
 			<Navbar expand="lg">
 				<div className="container">
-					{defaultNav()}
 					<Navbar.Collapse id="basic-navbar-nav"></Navbar.Collapse>
 					<Nav className="mr-3">
 						{showInbox()}
@@ -145,6 +130,7 @@ export const TopNav = () => {
 						<NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
 						<NavDropdown.Item onClick={() => signOut()}>Logout</NavDropdown.Item>
 					</NavDropdown>
+					{defaultNav()}
 				</div>
 				{showLocationModal && (
 					<Modal show={!!showLocationModal} onHide={handleLocationClose} centered>
