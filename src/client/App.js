@@ -37,7 +37,7 @@ const App = () => {
 					}
 
 					// Get user info
-					const resp = await firebaseDb.ref(`users/${u.uid}`).once('value');
+					const resp = await firebaseDb.ref(`user/${u.uid}`).once('value');
 					const userInfo = resp.val();
 					console.log('userInfo: ', userInfo);
 					if (userInfo) {
@@ -51,57 +51,78 @@ const App = () => {
 							// 2. Listen for messages on your entries
 							if (u) {
 								// Check messageSubscriptions
-								firebaseDb
-									.ref(`messageInbox/${userInfo.location.collectionId}/${u.uid}`)
-									.on('value', (snapshot) => {
-										const results = snapshot.val();
-										console.log('results: ', results);
-										if (results) {
-											// Filter the results.
-											// If already on conversation,
-											// delete the inbox notification
-											let filteredInbox = keys(results).map((key) => {
-												return {
-													...results[key],
-													key,
-												};
-											});
+								// firebaseDb
+								// 	.ref(`messageInbox/${userInfo.location.collectionId}/${u.uid}`)
+								// 	.on('value', (snapshot) => {
+								// 		const results = snapshot.val();
+								// 		console.log('results: ', results);
+								// 		if (results) {
+								// 			// Filter the results.
+								// 			// If already on conversation,
+								// 			// delete the inbox notification
+								// 			let filteredInbox = keys(results).map((key) => {
+								// 				return {
+								// 					...results[key],
+								// 					key,
+								// 				};
+								// 			});
 
-											filteredInbox = orderBy(filteredInbox, 'time', 'desc');
+								// 			filteredInbox = orderBy(filteredInbox, 'time', 'desc');
 
-											if (status) {
-												// If the convo is already active, we can mark it as read
-												// console.log('status: ', status);
-												filteredInbox = filteredInbox.map((result, i) => {
-													// console.log('result: ', result);
-													if (result.statusUid === status.uid) {
-														return {
-															...result,
-															status: 'read',
-														};
-													} else {
-														return result;
-													}
-												});
-											}
+								// 			if (status) {
+								// 				// If the convo is already active, we can mark it as read
+								// 				// console.log('status: ', status);
+								// 				filteredInbox = filteredInbox.map((result, i) => {
+								// 					// console.log('result: ', result);
+								// 					if (result.statusUid === status.uid) {
+								// 						return {
+								// 							...result,
+								// 							status: 'read',
+								// 						};
+								// 					} else {
+								// 						return result;
+								// 					}
+								// 				});
+								// 			}
 
-											userDispatch({
-												type: 'SET_INBOX',
-												inbox: filteredInbox,
-											});
-										} else {
-											userDispatch({
-												type: 'SET_INBOX',
-												inbox: null,
-											});
-										}
+								// 			userDispatch({
+								// 				type: 'SET_INBOX',
+								// 				inbox: filteredInbox,
+								// 			});
+								// 		} else {
+								// 			userDispatch({
+								// 				type: 'SET_INBOX',
+								// 				inbox: null,
+								// 			});
+								// 		}
+								// 	});
+
+								// ARCHIVE (ONE-TIME)
+								const resp = await firebaseDb.ref(`archive/${u.uid}`).once('value');
+								const myArchive = resp.val();
+								if (myArchive) {
+									const formattedArchive = keys(myArchive).map((key) => {
+										return {
+											...myArchive[key],
+											key,
+										};
 									});
+									const lastStatus = formattedArchive.slice(0);
+									userDispatch({
+										type: 'SET_ARCHIVE',
+										archive: formattedArchive,
+									});
+									userDispatch({
+										type: 'SET_LAST_STATUS',
+										lastStatus,
+									});
+								}
 							}
 						}
-						if (userInfo.preferences) {
+						if (userInfo.options) {
 							userDispatch({
-								type: 'SET_PREFERENCES',
-								preferences: userInfo.preferences,
+								type: 'SET_OPTIONS',
+								options: userInfo.options,
 							});
 						}
 						if (userInfo.profile) {

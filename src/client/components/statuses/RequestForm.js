@@ -1,26 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../context/UserContext';
-import { Button, ToggleButton, ToggleButtonGroup, Modal, Form, Row } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import { useFormik } from 'formik';
 import { firebaseDb } from '../../services/firebase';
-import { Profile } from '../Profile';
 const moment = require('moment');
 
-const preferences = ['Dating', 'Hangout'];
-
 export const RequestForm = () => {
-	const [{ user, location, profile }, userDispatch] = useContext(UserContext);
-	const [loading, setLoading] = useState(true);
-	const [status, setstatus] = useState();
+	const [{ user, options, profile, lastStatus }, userDispatch] = useContext(UserContext);
+	const [archive, setArchive] = useState();
 
-	const getMystatus = async () => {
-		const resp = await firebaseDb.ref(`shopping/${location.collectionId}/${user.uid}`).once('value');
+	const getArchive = async () => {
+		const resp = await firebaseDb.ref(`archive/${user.uid}`).once('value');
 
-		const mystatus = resp.val();
-		setstatus(mystatus);
-		setLoading(false);
+		const myArchive = resp.val();
+		setArchive(myArchive);
 	};
 
 	useEffect(() => {
@@ -45,8 +40,8 @@ export const RequestForm = () => {
 
 	const validate = (values) => {
 		const errors = {};
-		if (!values.preference) {
-			errors.preference = 'Required';
+		if (!profile) {
+			errors.profile = 'You must save a profile before setting a status.';
 		}
 		if (!values.status) {
 			errors.status = 'Required';
@@ -54,8 +49,7 @@ export const RequestForm = () => {
 		return errors;
 	};
 
-	const initialValues = status || {
-		preference: (user && user.preference) || 'Hangout',
+	const initialValues = lastStatus || {
 		status: '',
 	};
 	const formik = useFormik({
@@ -68,6 +62,7 @@ export const RequestForm = () => {
 					showLogin: true,
 				});
 			} else {
+				const room = options && options.preference === 'Dating' ? profile.prefCategory : 'Hangout';
 				const unix = moment().unix();
 				const payload = {
 					...values,
@@ -75,7 +70,7 @@ export const RequestForm = () => {
 					time: values.time || unix,
 					photoURL: user.photoURL,
 				};
-				await firebaseDb.ref(`statuses/${location.collectionId}/${user.uid}`).set(payload);
+				await firebaseDb.ref(`statuses/${room}/${user.uid}`).set(payload);
 			}
 		},
 		enableReinitialize: true,
@@ -86,17 +81,11 @@ export const RequestForm = () => {
 	return (
 		<div>
 			<h3>Set your vibe.</h3>
+			{errors.profile && touched.status}
 
 			<div>
 				<p>Only 1 status allowed at a time. Statuses expire in 24 hours.</p>
 				<Form onSubmit={handleSubmit}>
-					<Form.Group>
-						<Form.Label>Preference</Form.Label>
-						<Form.Row>
-							{preferences.map((preference, index) => preferenceLabel(preference, index))}
-						</Form.Row>
-					</Form.Group>
-
 					<Form.Group>
 						<Form.Label>Your status</Form.Label>
 						<ReactQuill

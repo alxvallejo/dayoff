@@ -5,30 +5,45 @@ import { Image, Row, Col, Badge, Container, Form, Button, Modal } from 'react-bo
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import { RequestForm } from './statuses/RequestForm';
-import { getProfile } from '../actions/User';
+import { Profile } from './Profile';
 
 import { firebaseDb } from '../services/firebase';
-import { map } from 'lodash';
+import { map, keys, orderBy } from 'lodash';
 
 const moment = require('moment');
 
 export const Dashboard = () => {
-	const [{ user, location, profile }, userDispatch] = useContext(UserContext);
-	const [{ statuses, status }, statusDispatch] = useContext(StatusContext);
+	const [{ user, options, profile }, userDispatch] = useContext(UserContext);
+	const [{ statuses }, statusDispatch] = useContext(StatusContext);
 	const [tab, setTab] = useState('driver');
 
 	useEffect(() => {
-		if (user && !profile) {
-			getProfile(user);
-		}
-	}, [user, profile]);
+		const room =
+			options && options.preference === 'Dating' && profile && profile.prefCategory ? profile.pref : 'Hangout';
+		firebaseDb.ref(`statuses/${room}`).on('value', (snapshot) => {
+			const results = snapshot.val();
+			if (results) {
+				let filteredStatuses = keys(results).map((key) => {
+					return {
+						...results[key],
+						key,
+					};
+				});
+				filteredStatuses = orderBy(filteredStatuses, 'time', 'desc');
+				statusDispatch({
+					type: 'SET_STATUSES',
+					statuses: filteredStatuses,
+				});
+			}
+		});
+	}, [profile, options]);
 
-	const contactButton = (shopperstatus) => {
-		if (user && shopperstatus.uid === user.uid) {
+	const contactButton = (status) => {
+		if (user && status.uid === user.uid) {
 			return null;
 		}
 		return (
-			<a onClick={() => statusDispatch({ type: 'SET_STATUS', status: shopperstatus })}>
+			<a onClick={() => statusDispatch({ type: 'SET_STATUS', status: status })}>
 				<Badge variant="secondary">Message</Badge>
 			</a>
 		);
@@ -37,32 +52,29 @@ export const Dashboard = () => {
 	return (
 		<Container>
 			<Row>
-				<Col>
-					<RequestForm />
-				</Col>
+				<Col>{profile ? <RequestForm /> : <Profile />}</Col>
 				<Col className="ml-4">
 					<div>
 						{statuses &&
-							statuses.map((shopperstatus, i) => {
-								const displayDate = moment(shopperstatus.unix).fromNow();
+							statuses.map((status, i) => {
+								const displayDate = moment(status.unix).fromNow();
 
 								return (
 									<Row key={i}>
 										<div className="mr-4">
-											<Image roundedCircle src={shopperstatus.photoURL} style={{ width: 50 }} />
+											<Image roundedCircle src={status.photoURL} style={{ width: 50 }} />
 										</div>
 										<div>
 											<Row>
 												<Col>
-													<h5>{shopperstatus.displayName}</h5>
-													{contactButton(shopperstatus)}
+													<h5>{status.displayName}</h5>
 												</Col>
 												<div>
 													<h5>
 														<i>{displayDate}</i>
 													</h5>
 													<ReactQuill
-														value={shopperstatus.status}
+														value={status.status}
 														readOnly={true}
 														theme={'bubble'}
 													/>

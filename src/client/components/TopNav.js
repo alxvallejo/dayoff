@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import { UserContext } from '../context/UserContext';
 import { StatusContext } from '../context/StatusContext';
-import { Nav, Navbar, NavDropdown, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
+import { Row, Button, Nav, Navbar, NavDropdown, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 import { LocationSelection } from './LocationSelection';
 import { SuggestCity } from './SuggestCity';
@@ -10,8 +10,10 @@ import LinesEllipsis from 'react-lines-ellipsis';
 
 import { firebaseAuth, firebaseDb } from '../services/firebase';
 
+const preferences = ['Dating', 'Hangout'];
+
 export const TopNav = () => {
-	const [{ user, location, inbox }, userDispatch] = useContext(UserContext);
+	const [{ user, options, inbox }, userDispatch] = useContext(UserContext);
 	const [{ statuses }, statusDispatch] = useContext(StatusContext);
 	console.log('inbox at topNav: ', inbox);
 	const [showLocationModal, setLocationModal] = useState();
@@ -49,6 +51,45 @@ export const TopNav = () => {
 					</a>
 				</div>
 			</div>
+		);
+	};
+
+	const togglePref = async (newPref) => {
+		if (!user) {
+			userDispatch({
+				type: 'SHOW_LOGIN',
+				showLogin: true,
+			});
+		} else {
+			const newOptions = {
+				...options,
+				preference: newPref,
+			};
+			firebaseDb.ref(`users/${user.uid}/options`).set();
+			userDispatch({
+				type: 'SET_OPTIONS',
+				options: newOptions,
+			});
+		}
+	};
+
+	const togglePrefForm = () => {
+		const currentPref = (options && options.preference) || 'Hangout';
+		return (
+			<Row>
+				<Button
+					variant={currentPref === 'Dating' ? 'primary' : 'primary-outline'}
+					onClick={() => togglePref('Dating')}
+				>
+					Dating
+				</Button>
+				<Button
+					variant={currentPref === 'Hangout' ? 'primary' : 'primary-outline'}
+					onClick={() => togglePref('Hangout')}
+				>
+					Hangout
+				</Button>
+			</Row>
 		);
 	};
 
@@ -116,20 +157,17 @@ export const TopNav = () => {
 		return (
 			<Navbar expand="lg">
 				<div className="container">
-					<Navbar.Collapse id="basic-navbar-nav"></Navbar.Collapse>
-					<Nav className="mr-3">
-						{showInbox()}
-						<NavLink exact to="/" activeClassName="active" className="ml-4">
-							<h6>Stores</h6>
-						</NavLink>
-						<NavLink to="/shopping-list" activeClassName="active" className="ml-4">
-							<h6>Shopping</h6>
-						</NavLink>
-					</Nav>
-					<NavDropdown title={<Image src={photoURL} className="img-thumbnail" />} id="basic-nav-dropdown">
-						<NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
-						<NavDropdown.Item onClick={() => signOut()}>Logout</NavDropdown.Item>
-					</NavDropdown>
+					<div>
+						<NavDropdown
+							title={<Image roundedCircle src={photoURL} className="img-thumbnail" />}
+							id="basic-nav-dropdown"
+						>
+							<NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
+							<NavDropdown.Item onClick={() => signOut()}>Logout</NavDropdown.Item>
+						</NavDropdown>
+						<Navbar.Collapse id="basic-navbar-nav"></Navbar.Collapse>
+						{togglePrefForm()}
+					</div>
 					{defaultNav()}
 				</div>
 				{showLocationModal && (

@@ -4,12 +4,14 @@ export const UserContext = React.createContext();
 
 const initialUser = {
 	user: null,
-	preferences: null,
+	options: null,
 	profile: null,
 	favorites: [],
 	tutorial: null,
 	showLogin: false,
 	inbox: null,
+	lastStatus: null,
+	archive: null,
 };
 
 const UserReducer = (state, action) => {
@@ -20,10 +22,10 @@ const UserReducer = (state, action) => {
 				user: action.user,
 			};
 
-		case 'SET_PREFERENCES':
+		case 'SET_OPTIONS':
 			return {
 				...state,
-				preferences: action.preferences,
+				options: action.options,
 			};
 
 		case 'SET_PROFILE':
@@ -62,6 +64,18 @@ const UserReducer = (state, action) => {
 			return {
 				...state,
 				inbox: action.inbox,
+			};
+
+		case 'SET_LAST_STATUS':
+			return {
+				...state,
+				lastStatus: action.lastStatus,
+			};
+
+		case 'SET_ARCHIVE':
+			return {
+				...state,
+				archive: action.archive,
 			};
 
 		default:

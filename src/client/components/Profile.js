@@ -18,8 +18,8 @@ export const Profile = () => {
 		return (
 			<Form.Label key={index}>
 				<Button
-					variant={values.preference === pref ? 'primary' : 'primary-outline'}
-					checked={values.preference === pref}
+					variant={values[field] === pref ? 'primary' : 'primary-outline'}
+					checked={values[field] === pref}
 					onClick={() => setFieldValue(field, pref)}
 				>
 					{pref}
@@ -78,7 +78,11 @@ export const Profile = () => {
 					photoURL: user.photoURL,
 					prefCategory,
 				};
-				await firebaseDb.ref(`user/${user.uid}`).set(payload);
+				await firebaseDb.ref(`user/${user.uid}/profile`).set(payload);
+				userDispatch({
+					type: 'SET_PROFILE',
+					profile: payload,
+				});
 			}
 		},
 		enableReinitialize: true,
@@ -110,7 +114,7 @@ export const Profile = () => {
 
 					<Form.Group>
 						<Form.Label>Location</Form.Label>
-						<Form.Control type="text" name="location" onChange={handleChange} value={values.location} />
+						<Form.Control type="text" name="location" onChange={handleChange} />
 						{errors.location && touched.location && errors.location}
 					</Form.Group>
 
@@ -123,12 +127,12 @@ export const Profile = () => {
 
 					<Form.Group>
 						<Form.Label>Facebook URL</Form.Label>
-						<Form.Control type="text" name="facebook" onChange={handleChange} value={values.facebook} />
+						<Form.Control type="text" name="facebook" onChange={handleChange} />
 						{errors.facebook && touched.facebook && errors.facebook}
 					</Form.Group>
 
 					<Button variant="outline-primary" type="submit" disabled={isSubmitting}>
-						Post
+						Save Profile
 					</Button>
 				</Form>
 			</div>
