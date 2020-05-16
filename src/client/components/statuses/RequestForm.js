@@ -67,8 +67,11 @@ export const RequestForm = () => {
 				const payload = {
 					...values,
 					uid: user.uid,
+					displayName: profile.displayName,
+					age: profile.age,
 					time: values.time || unix,
 					photoURL: user.photoURL,
+					room,
 				};
 				await firebaseDb.ref(`statuses/${room}/${user.uid}`).set(payload);
 			}
@@ -84,7 +87,7 @@ export const RequestForm = () => {
 			{errors.profile && touched.status}
 
 			<div>
-				<p>Only 1 status allowed at a time. Statuses expire in 24 hours.</p>
+				<p>One status allowed at a time. Statuses expire in 24 hours.</p>
 				<Form onSubmit={handleSubmit}>
 					<Form.Group>
 						<Form.Label>Your status</Form.Label>

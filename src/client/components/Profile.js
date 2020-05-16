@@ -6,6 +6,7 @@ import { firebaseDb } from '../services/firebase';
 import { UserContext } from '../context/UserContext';
 import { states } from './admin/states';
 import { getPrefCategory } from '../utils/User';
+import InputMask from 'react-input-mask';
 const moment = require('moment');
 
 const genders = ['Male', 'Female'];
@@ -13,6 +14,7 @@ const preferences = ['Male', 'Female'];
 
 export const Profile = () => {
 	const [{ user, profile }, userDispatch] = useContext(UserContext);
+	console.log('profile: ', profile);
 
 	const preferenceLabel = (field, pref, index) => {
 		return (
@@ -33,6 +35,15 @@ export const Profile = () => {
 		if (!values.displayName) {
 			errors.displayName = 'Required';
 		}
+		if (!values.birthday) {
+			errors.birthday = 'Required';
+		} else {
+			if (!moment(values.birthday).isValid()) {
+				errors.birthday = 'Invalid birthday';
+			}
+			console.log('birthday', values.birthday);
+		}
+
 		if (!values.gender) {
 			errors.gender = 'Required';
 		}
@@ -46,19 +57,22 @@ export const Profile = () => {
 		return errors;
 	};
 
-	const initialValues = user
-		? {
-				displayName: user.displayName,
-				gender: user.gender,
-				location: user.location,
-				preference: user.preference,
-		  }
-		: {
-				displayName: '',
-				gender: '',
-				location: '',
-				preference: '',
-		  };
+	const initialValues =
+		user && profile
+			? {
+					displayName: user.displayName,
+					birthday: profile.birthday,
+					gender: profile.gender,
+					location: profile.location,
+					preference: profile.preference,
+			  }
+			: {
+					displayName: '',
+					birthday: '',
+					gender: '',
+					location: '',
+					preference: '',
+			  };
 	const formik = useFormik({
 		initialValues,
 		validate,
@@ -71,9 +85,13 @@ export const Profile = () => {
 			} else {
 				const unix = moment().unix();
 				const prefCategory = getPrefCategory(values);
+				// const age = moment(values.birthday, 'MM/DD/YYYY')
+				const age = moment().diff(values.birthday, 'years');
+
 				const payload = {
 					...values,
 					uid: user.uid,
+					age,
 					modified: values.time || unix,
 					photoURL: user.photoURL,
 					prefCategory,
@@ -83,19 +101,22 @@ export const Profile = () => {
 					type: 'SET_PROFILE',
 					profile: payload,
 				});
+				userDispatch({ type: 'SHOW_PROFILE', showProfile: false });
 			}
 		},
 		enableReinitialize: true,
 	});
 	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
-	// console.log('values: ', values);
+	console.log('values: ', values);
 
 	return (
 		<div>
-			<h3>Set your profile.</h3>
-
 			<div>
-				<Form onSubmit={handleSubmit}>
+				<Form
+					onSubmit={handleSubmit}
+					className="d-flex flex-column align-items-center justify-content-center text-center"
+				>
+					{/* <h3>Set your profile.</h3> */}
 					<Form.Group>
 						<Form.Label>Name</Form.Label>
 						<Form.Control
@@ -103,8 +124,21 @@ export const Profile = () => {
 							name="displayName"
 							onChange={handleChange}
 							value={values.displayName}
+							className="text-center"
 						/>
 						{errors.displayName && touched.displayName && errors.displayName}
+					</Form.Group>
+
+					<Form.Group>
+						<Form.Label>Birthday</Form.Label>
+						<InputMask
+							mask="99/99/9999"
+							name="birthday"
+							onChange={handleChange}
+							value={values.birthday}
+							className="form-control text-center"
+						/>
+						{errors.birthday && touched.birthday && errors.birthday}
 					</Form.Group>
 
 					<Form.Group>
@@ -114,7 +148,13 @@ export const Profile = () => {
 
 					<Form.Group>
 						<Form.Label>Location</Form.Label>
-						<Form.Control type="text" name="location" onChange={handleChange} />
+						<Form.Control
+							type="text"
+							name="location"
+							onChange={handleChange}
+							value={values.location}
+							className="text-center"
+						/>
 						{errors.location && touched.location && errors.location}
 					</Form.Group>
 

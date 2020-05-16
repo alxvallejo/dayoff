@@ -9,6 +9,7 @@ const initialUser = {
 	favorites: [],
 	tutorial: null,
 	showLogin: false,
+	showProfile: false,
 	inbox: null,
 	lastStatus: null,
 	archive: null,
@@ -56,6 +57,12 @@ const UserReducer = (state, action) => {
 			return {
 				...state,
 				showLogin: action.showLogin,
+			};
+
+		case 'SHOW_PROFILE':
+			return {
+				...state,
+				showProfile: action.showProfile,
 			};
 
 		// This is essentially a list of

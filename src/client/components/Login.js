@@ -39,8 +39,8 @@ export const Login = ({ handleClose }) => {
 
 	return (
 		<Container className="login">
-			<div className="text-center mb-4">
-				<h2>Dayoff Login</h2>
+			<div className="mb-4">
+				<h3>Login</h3>
 				<p>Only for verification purposes. Your data is never shared.</p>
 			</div>
 			<StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />

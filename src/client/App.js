@@ -10,21 +10,25 @@ import { keys, map, orderBy } from 'lodash';
 
 import { Login } from './components/Login';
 import { TopNav } from './components/TopNav';
+
 import { Dashboard } from './components/Dashboard';
 import { Footer } from './components/Footer';
 import { AdminDash } from './components/admin';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { Message } from './components/statuses/Message';
+import { Profile } from './components/Profile';
 
 import { firebaseAuth, firebaseDb } from './services/firebase';
 
 const App = () => {
-	const [{ user, location, showLogin }, userDispatch] = useContext(UserContext);
+	const [{ user, profile, showProfile, showLogin }, userDispatch] = useContext(UserContext);
 	const [{ status }, statusDispatch] = useContext(StatusContext);
 	const [loading, setLoading] = useState(true);
 	const [isAdmin, setIsAdmin] = useState();
 
 	useEffect(() => {
+		console.log('app use effect');
+
 		const checkUser = async () => {
 			firebaseAuth.onAuthStateChanged(async (u) => {
 				console.log('user on app load: ', u);
@@ -42,6 +46,7 @@ const App = () => {
 					console.log('userInfo: ', userInfo);
 					if (userInfo) {
 						if (userInfo.profile) {
+							console.log('userInfo.profile: ', userInfo.profile);
 							userDispatch({
 								type: 'SET_PROFILE',
 								profile: userInfo.profile,
@@ -50,52 +55,47 @@ const App = () => {
 							// 1. Listen for messageSubscriptions on other entries
 							// 2. Listen for messages on your entries
 							if (u) {
-								// Check messageSubscriptions
-								// firebaseDb
-								// 	.ref(`messageInbox/${userInfo.location.collectionId}/${u.uid}`)
-								// 	.on('value', (snapshot) => {
-								// 		const results = snapshot.val();
-								// 		console.log('results: ', results);
-								// 		if (results) {
-								// 			// Filter the results.
-								// 			// If already on conversation,
-								// 			// delete the inbox notification
-								// 			let filteredInbox = keys(results).map((key) => {
-								// 				return {
-								// 					...results[key],
-								// 					key,
-								// 				};
-								// 			});
+								// INBOX
+								firebaseDb.ref(`inbox/${u.uid}`).on('value', (snapshot) => {
+									const results = snapshot.val();
+									console.log('results: ', results);
+									if (results) {
+										let filteredInbox = map(results);
 
-								// 			filteredInbox = orderBy(filteredInbox, 'time', 'desc');
+										filteredInbox = orderBy(filteredInbox, 'time', 'desc');
 
-								// 			if (status) {
-								// 				// If the convo is already active, we can mark it as read
-								// 				// console.log('status: ', status);
-								// 				filteredInbox = filteredInbox.map((result, i) => {
-								// 					// console.log('result: ', result);
-								// 					if (result.statusUid === status.uid) {
-								// 						return {
-								// 							...result,
-								// 							status: 'read',
-								// 						};
-								// 					} else {
-								// 						return result;
-								// 					}
-								// 				});
-								// 			}
+										if (status) {
+											// If the convo is already active, we can mark it as read
+											filteredInbox = filteredInbox.map((result, i) => {
+												if (result.statusUid === status.uid) {
+													if (result.read === false) {
+														firebaseDb
+															.ref(`inbox/${user.uid}/${result.key}`)
+															.set({ ...result, read: true });
+														return {
+															...result,
+															read: true,
+														};
+													} else {
+														return result;
+													}
+												} else {
+													return result;
+												}
+											});
+										}
 
-								// 			userDispatch({
-								// 				type: 'SET_INBOX',
-								// 				inbox: filteredInbox,
-								// 			});
-								// 		} else {
-								// 			userDispatch({
-								// 				type: 'SET_INBOX',
-								// 				inbox: null,
-								// 			});
-								// 		}
-								// 	});
+										userDispatch({
+											type: 'SET_INBOX',
+											inbox: filteredInbox,
+										});
+									} else {
+										userDispatch({
+											type: 'SET_INBOX',
+											inbox: null,
+										});
+									}
+								});
 
 								// ARCHIVE (ONE-TIME)
 								const resp = await firebaseDb.ref(`archive/${u.uid}`).once('value');
@@ -147,6 +147,13 @@ const App = () => {
 					await checkAdmin(u);
 				}
 
+				if (user && !profile) {
+					userDispatch({
+						type: 'SHOW_PROFILE',
+						showProfile: true,
+					});
+				}
+
 				setLoading(false);
 			});
 		};
@@ -186,6 +193,7 @@ const App = () => {
 	return (
 		<BrowserRouter>
 			<TopNav />
+
 			<Switch>
 				<Route path="/privacy" component={PrivacyPolicy} />
 				{isAdmin && <Route path="/admin" component={AdminDash} />}
@@ -197,7 +205,19 @@ const App = () => {
 					<Login handleClose={handleLoginClose} />
 				</Modal.Body>
 			</Modal>
-			<Modal show={status && user} onHide={() => statusDispatch({ type: 'SET_STATUS', status: null })} centered>
+			<Modal
+				show={showProfile}
+				onHide={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: false })}
+				centered
+			>
+				<Modal.Header closeButton>
+					<Modal.Title>{`Profile`}</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<Profile />
+				</Modal.Body>
+			</Modal>
+			<Modal show={!!status} onHide={() => statusDispatch({ type: 'SET_STATUS', status: null })} centered>
 				<Modal.Header closeButton>
 					<Modal.Title>{`Chat with ${status && status.displayName}`}</Modal.Title>
 				</Modal.Header>

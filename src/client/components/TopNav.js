@@ -3,14 +3,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import { StatusContext } from '../context/StatusContext';
 import { Row, Button, Nav, Navbar, NavDropdown, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
-import { NavLink } from 'react-router-dom';
-import { LocationSelection } from './LocationSelection';
-import { SuggestCity } from './SuggestCity';
 import LinesEllipsis from 'react-lines-ellipsis';
+import { SecondNav } from './SecondNav';
 
-import { firebaseAuth, firebaseDb } from '../services/firebase';
-
-const preferences = ['Dating', 'Hangout'];
+import { firebaseAuth } from '../services/firebase';
 
 export const TopNav = () => {
 	const [{ user, options, inbox }, userDispatch] = useContext(UserContext);
@@ -45,51 +41,12 @@ export const TopNav = () => {
 	const defaultNav = () => {
 		return (
 			<div>
-				<div className="d-flex align-items-center">
-					<a href="/" className="navbar-brand">
+				<div className="d-flex align-self-center">
+					<a href="/" className="navbar-brand mr-0">
 						Dayoff
 					</a>
 				</div>
 			</div>
-		);
-	};
-
-	const togglePref = async (newPref) => {
-		if (!user) {
-			userDispatch({
-				type: 'SHOW_LOGIN',
-				showLogin: true,
-			});
-		} else {
-			const newOptions = {
-				...options,
-				preference: newPref,
-			};
-			firebaseDb.ref(`users/${user.uid}/options`).set();
-			userDispatch({
-				type: 'SET_OPTIONS',
-				options: newOptions,
-			});
-		}
-	};
-
-	const togglePrefForm = () => {
-		const currentPref = (options && options.preference) || 'Hangout';
-		return (
-			<Row>
-				<Button
-					variant={currentPref === 'Dating' ? 'primary' : 'primary-outline'}
-					onClick={() => togglePref('Dating')}
-				>
-					Dating
-				</Button>
-				<Button
-					variant={currentPref === 'Hangout' ? 'primary' : 'primary-outline'}
-					onClick={() => togglePref('Hangout')}
-				>
-					Hangout
-				</Button>
-			</Row>
 		);
 	};
 
@@ -111,10 +68,10 @@ export const TopNav = () => {
 					{inbox.map((inboxMsg, i) => {
 						return (
 							<div key={i} className="inbox-message" onClick={() => selectMsg(inboxMsg)}>
-								<LinesEllipsis text={inboxMsg.lastMessage} className={inboxMsg.status} />
 								<div className="byline">
-									from <i>{inboxMsg.displayName}</i>
+									<i>{inboxMsg.lastDisplayName}</i>
 								</div>
+								<LinesEllipsis text={inboxMsg.message} className={inboxMsg.status} />
 							</div>
 						);
 					})}
@@ -127,10 +84,13 @@ export const TopNav = () => {
 		if (!inbox) {
 			return null;
 		}
-		const inboxCount = inbox.filter((x) => x.status == 'unread').length;
+		const inboxCount = inbox.filter((x) => x.read == false).length;
+		if (inboxCount < 1) {
+			return null;
+		}
 		return (
 			<OverlayTrigger trigger="click" key="inbox" placement="bottom" overlay={inboxOverlay()} rootClose={true}>
-				<div>
+				<div className="inbox-button mt-3">
 					<i className="fas fa-inbox" />
 					<Badge pill variant="secondary" className="inbox-count">
 						{inboxCount}
@@ -157,7 +117,7 @@ export const TopNav = () => {
 		return (
 			<Navbar expand="lg">
 				<div className="container">
-					<div>
+					<Row className="align-items-center">
 						<NavDropdown
 							title={<Image roundedCircle src={photoURL} className="img-thumbnail" />}
 							id="basic-nav-dropdown"
@@ -166,28 +126,18 @@ export const TopNav = () => {
 							<NavDropdown.Item onClick={() => signOut()}>Logout</NavDropdown.Item>
 						</NavDropdown>
 						<Navbar.Collapse id="basic-navbar-nav"></Navbar.Collapse>
-						{togglePrefForm()}
-					</div>
+						<a
+							role="href"
+							onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}
+							className="ml-2 mr-3"
+						>
+							Profile
+						</a>
+						{showInbox()}
+					</Row>
 					{defaultNav()}
+					<SecondNav />
 				</div>
-				{showLocationModal && (
-					<Modal show={!!showLocationModal} onHide={handleLocationClose} centered>
-						<Modal.Header closeButton>
-							<Modal.Title>Change Location</Modal.Title>
-						</Modal.Header>
-						<Modal.Body>
-							<LocationSelection
-								handleClose={handleLocationClose}
-								onSelectState={(state) => setSelectedState(state)}
-							/>
-							{selectedState && (
-								<div>
-									<SuggestCity state={selectedState} />
-								</div>
-							)}
-						</Modal.Body>
-					</Modal>
-				)}
 			</Navbar>
 		);
 	}

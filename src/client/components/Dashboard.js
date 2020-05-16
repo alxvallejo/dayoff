@@ -20,6 +20,7 @@ export const Dashboard = () => {
 	useEffect(() => {
 		const room =
 			options && options.preference === 'Dating' && profile && profile.prefCategory ? profile.pref : 'Hangout';
+		console.log('room', room);
 		firebaseDb.ref(`statuses/${room}`).on('value', (snapshot) => {
 			const results = snapshot.val();
 			if (results) {
@@ -29,10 +30,16 @@ export const Dashboard = () => {
 						key,
 					};
 				});
+				// let filteredStatuses = map(results);
 				filteredStatuses = orderBy(filteredStatuses, 'time', 'desc');
 				statusDispatch({
 					type: 'SET_STATUSES',
 					statuses: filteredStatuses,
+				});
+			} else {
+				statusDispatch({
+					type: 'SET_STATUSES',
+					statuses: null,
 				});
 			}
 		});
@@ -44,20 +51,31 @@ export const Dashboard = () => {
 		}
 		return (
 			<a onClick={() => statusDispatch({ type: 'SET_STATUS', status: status })}>
-				<Badge variant="secondary">Message</Badge>
+				<Badge variant="secondary">Chat</Badge>
 			</a>
+		);
+	};
+
+	const welcome = () => {
+		return (
+			<div>
+				<h3>Welcome</h3>
+				<p>Dayoff is a chat community where you're allowed one post every 24 hours.</p>
+				<Button onClick={() => userDispatch({ type: 'SHOW_LOGIN', showLogin: true })}>Get started.</Button>
+			</div>
 		);
 	};
 
 	return (
 		<Container>
 			<Row>
-				<Col>{profile ? <RequestForm /> : <Profile />}</Col>
+				<Col>{profile ? <RequestForm /> : welcome()}</Col>
 				<Col className="ml-4">
 					<div>
 						{statuses &&
 							statuses.map((status, i) => {
-								const displayDate = moment(status.unix).fromNow();
+								console.log('status: ', status);
+								const displayDate = moment.unix(status.time).fromNow();
 
 								return (
 									<Row key={i}>
@@ -66,18 +84,18 @@ export const Dashboard = () => {
 										</div>
 										<div>
 											<Row>
-												<Col>
-													<h5>{status.displayName}</h5>
-												</Col>
-												<div>
-													<h5>
-														<i>{displayDate}</i>
-													</h5>
+												<div className="status-listing mb-3">
+													<div className="byline">
+														<span>
+															<b>{status.displayName}</b> <i>{displayDate}</i>
+														</span>
+													</div>
 													<ReactQuill
 														value={status.status}
 														readOnly={true}
 														theme={'bubble'}
 													/>
+													<div>{contactButton(status)}</div>
 												</div>
 											</Row>
 										</div>

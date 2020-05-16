@@ -38,7 +38,7 @@ $orange: #ff5c35;
 $orangeLight: #ff783d;
 $orangeDark: #bb2906;
 $green: #86c992;
-$cyan: #79a3dc;
+$cyan: #29c8f2;
 $lightBlue: #c0dbff;
 $red: #bb2906;
 $pink: #e98;
@@ -51,11 +51,11 @@ $yellowBold: #ffc314;
 $teal: #88bdbc;
 $darkTeal: #1c8aa5;
 
-$main: $indigo;
+// $main: $indigo;
 
 // // Brand Colors
-$primary: $main;
-$secondary: $orange;
+$primary: $indigo;
+$secondary: $cyan;
 $success: $green;
 $info: $navy;
 $warning: $yellow;
@@ -74,7 +74,7 @@ $body-color: $gray-900;
 //
 // Style anchor elements.
 
-$link-color: $main;
+$link-color: $primary;
 $link-decoration: none;
 $link-hover-color: darken($link-color, 15%);
 $link-hover-decoration: none;

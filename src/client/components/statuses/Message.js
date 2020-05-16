@@ -10,59 +10,67 @@ import 'react-quill/dist/quill.bubble.css';
 const moment = require('moment');
 
 export const Message = ({ status }) => {
-	const [{ user, location, inbox }, userDispatch] = useContext(UserContext);
+	const [{ user, profile, inbox }, userDispatch] = useContext(UserContext);
 	// const [{ user, location, inbox }, statusDispatch] = useContext(UserContext);
 	const [messages, setMessages] = useState();
-	const [convoRef, setConvoRef] = useState();
-	const [otherUid, setOtherUid] = useState();
+	const [convoKey, setConvoKey] = useState();
+	const [newConvo, setNewConvo] = useState();
+	const [convo, setConvo] = useState();
+
+	const convoListener = (convoID) => {
+		firebaseDb.ref(`messages/${status.room}/${convoID}`).on('value', (snapshot) => {
+			const results = snapshot.val();
+			if (results) {
+				setMessages(map(results));
+			}
+		});
+	};
 
 	const getConvo = async () => {
-		// Check if status is already in your inbox
-		let existingConvoRef = null;
+		let existingConvo = null;
 		if (inbox && status) {
 			inbox.map((subscription) => {
 				if (subscription.statusUid === status.uid) {
-					existingConvoRef = subscription.convoRef;
+					existingConvo = subscription;
+					setConvo(existingConvo);
+					setConvoKey(existingConvo.key);
+					firebaseDb.ref(`inbox/${user.uid}/${existingConvo.key}`).set({ ...existingConvo, read: true });
 				}
 			});
 		}
 
-		if (existingConvoRef) {
-			console.log('existingConvoRef: ', existingConvoRef);
-			setConvoRef(existingConvoRef);
-			firebaseDb.ref(`messages/${location.collectionId}/${existingConvoRef}`).on('value', (snapshot) => {
-				const results = snapshot.val();
-				if (results) {
-					setMessages(map(results));
-				}
-			});
-			// Also delete the messageInbox for your user (or set to read)
-			const inboxMsg = inbox.find((x) => x.statusUid === status.uid);
-			console.log('inboxMsg to delete: ', inboxMsg);
-			if (inboxMsg) {
-				firebaseDb.ref(`messageInbox/${location.collectionId}/${user.uid}/${inboxMsg.key}`).set({
-					...inboxMsg,
-					status: 'read',
-				});
-			}
+		if (existingConvo) {
+			setConvoKey(existingConvo.key);
+			convoListener(existingConvo.key);
+			// firebaseDb.ref(`messages/${status.room}/${existingConvo.key}`).on('value', (snapshot) => {
+			// 	const results = snapshot.val();
+			// 	if (results) {
+			// 		setMessages(map(results));
+			// 	}
+			// });
 		} else {
-			const newRef = await firebaseDb.ref(`messages/${location.collectionId}/`).push();
-			setConvoRef(newRef.key);
-			firebaseDb.ref(`messages/${location.collectionId}/${newRef.key}`).on('value', (snapshot) => {
-				const results = snapshot.val();
-				if (results) {
-					setMessages(map(results));
-				}
-			});
+			const newRef = await firebaseDb.ref(`messages/${status.room}/`).push();
+			setConvoKey(newRef.key);
+			setNewConvo(true);
+			convoListener(newRef.key);
+			// firebaseDb.ref(`messages/${status.room}/${newRef.key}`).on('value', (snapshot) => {
+			// 	const results = snapshot.val();
+			// 	if (results) {
+			// 		setMessages(map(results));
+			// 	}
+			// });
 		}
 	};
 
 	useEffect(() => {
 		getConvo();
 
-		if (status.uid === user.uid) {
-			// this is
-		}
+		return () => {
+			// unmount listeners
+			if (convo) {
+				firebaseDb.ref(`inbox/${status.room}/${convo.key}`).off('value', convoListener(convo.key));
+			}
+		};
 	}, []);
 
 	const validate = (values) => {
@@ -87,6 +95,41 @@ export const Message = ({ status }) => {
 				});
 			} else {
 				const unix = moment().unix();
+
+				let newConvoInfo;
+
+				if (convo) {
+					newConvoInfo = {
+						...convo,
+						time: unix,
+						lastUid: user.uid,
+						message: values.message,
+						lastDisplayName: profile.displayName,
+					};
+				} else {
+					newConvoInfo = {
+						key: convoKey,
+						room: status.room,
+						statusID: status.key,
+						statusUid: status.uid,
+						statusDisplayName: status.displayName,
+						replyUid: user.uid,
+						replyDisplayName: profile.displayName,
+						time: unix,
+						lastUid: user.uid,
+						message: values.message,
+						lastDisplayName: profile.displayName,
+					};
+				}
+
+				if (!convo) {
+					firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true });
+					firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false });
+				} else {
+					let otherUid = convo.statusUid === user.uid ? convo.replyUid : convo.statusUid;
+					firebaseDb.ref(`inbox/${otherUid}/${convoKey}`).set({ ...newConvoInfo, read: false });
+				}
+
 				const payload = {
 					...values,
 					statusUid: status.uid,
@@ -95,23 +138,7 @@ export const Message = ({ status }) => {
 					time: unix,
 				};
 
-				firebaseDb.ref(`messages/${location.collectionId}/${convoRef}`).push(payload);
-				formik.resetForm();
-				// Prepare subscription payload
-				const subscriptionPayload = {
-					convoRef,
-					lastUid: user.uid, // inverse uid
-					statusUid: status.uid,
-					lastMessage: values.message,
-					displayName: user.displayName,
-					time: unix,
-					status: 'unread',
-				};
-				// Add the recipient's subscription
-				firebaseDb.ref(`messageInbox/${location.collectionId}/${convoUid}`).push(subscriptionPayload);
-				// Add to your subscriptions
-				// ?? do we need this if we're already on the convo? prob not.
-				// firebaseDb.ref(`messageInbox/${location.collectionId}/${user.uid}`).push(subscriptionPayload);
+				firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload);
 			}
 		},
 		enableReinitialize: true,
@@ -173,16 +200,12 @@ export const Message = ({ status }) => {
 		}
 	};
 
-	const placeholder = () => {
-		if (!status) {
-			return null;
-		}
-		if (status.uid === user.uid) {
-			// Your status
-			return '';
-		} else {
-			return `Hi ${status.displayName}, I can help with your list!`;
-		}
+	const handleFormSubmit = (values, { setSubmitting, resetForm }) => {
+		handleSave(values, () => {
+			resetForm(initialValues);
+		});
+
+		setSubmitting(false);
 	};
 
 	return (
@@ -198,14 +221,15 @@ export const Message = ({ status }) => {
 						);
 					})}
 			</div>
-			<Form onSubmit={handleSubmit} inline>
+			<Form onSubmit={handleFormSubmit} inline>
 				<Form.Group className="flex-grow-1">
 					<Form.Control
 						className="flex-grow-1"
 						type="text"
 						name="message"
 						onChange={handleChange}
-						placeholder={placeholder()}
+						autoComplete="off"
+						// placeholder={placeholder()}
 					/>
 					<Button variant="outline-primary" type="submit" disabled={isSubmitting} className="ml-3">
 						Send
