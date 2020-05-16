@@ -1,11 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 
 import { UserContext } from '../../../context/UserContext';
-import { AdminContext } from '../../../context/AdminContext';
-import { Table, Row, Col, Button, ButtonGroup, Card, Tab, Nav, Form } from 'react-bootstrap';
+import { Table } from 'react-bootstrap';
 import { firebaseDb } from '../../../services/firebase';
-import { getStoresByLocation } from '../../../services/yelp';
-import { map, flatten, keys, join, groupBy, orderBy } from 'lodash';
+import { map, flatten, keys, groupBy, orderBy } from 'lodash';
 
 const moment = require('moment');
 

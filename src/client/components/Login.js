@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { firebaseAuth, firebaseDb } from '../services/firebase';
-import firebase from 'firebase';
+import { firebaseAuth, googleAuth, facebookAuth } from '../services/firebase';
+// import firebase from 'firebase';
 import { UserContext } from '../context/UserContext';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { Container, Button, Form, Card, Modal } from 'react-bootstrap';
@@ -15,7 +15,7 @@ export const Login = ({ handleClose }) => {
 		signInFlow: 'popup',
 		// We will display Google and Facebook as auth providers.
 		// signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID, firebase.auth.FacebookAuthProvider.PROVIDER_ID],
-		signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+		signInOptions: [googleAuth.PROVIDER_ID],
 		callbacks: {
 			// Avoid redirects after sign-in.
 			signInSuccessWithAuthResult: (authResult, redirectUrl) => {
