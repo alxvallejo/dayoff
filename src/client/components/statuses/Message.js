@@ -42,23 +42,11 @@ export const Message = ({ status }) => {
 		if (existingConvo) {
 			setConvoKey(existingConvo.key);
 			convoListener(existingConvo.key);
-			// firebaseDb.ref(`messages/${status.room}/${existingConvo.key}`).on('value', (snapshot) => {
-			// 	const results = snapshot.val();
-			// 	if (results) {
-			// 		setMessages(map(results));
-			// 	}
-			// });
 		} else {
 			const newRef = await firebaseDb.ref(`messages/${status.room}/`).push();
 			setConvoKey(newRef.key);
 			setNewConvo(true);
 			convoListener(newRef.key);
-			// firebaseDb.ref(`messages/${status.room}/${newRef.key}`).on('value', (snapshot) => {
-			// 	const results = snapshot.val();
-			// 	if (results) {
-			// 		setMessages(map(results));
-			// 	}
-			// });
 		}
 	};
 
@@ -113,8 +101,10 @@ export const Message = ({ status }) => {
 						statusID: status.key,
 						statusUid: status.uid,
 						statusDisplayName: status.displayName,
+						statusPhoto: status.photoURL,
 						replyUid: user.uid,
 						replyDisplayName: profile.displayName,
+						replyPhoto: user.photoURL,
 						time: unix,
 						lastUid: user.uid,
 						message: values.message,
