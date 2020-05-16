@@ -83,7 +83,7 @@ export const RequestForm = () => {
 
 	return (
 		<div>
-			<h3>Set your vibe.</h3>
+			<h3>Enjoy your Dayoff.</h3>
 			{errors.profile && touched.status}
 
 			<div>

@@ -71,7 +71,7 @@ export const Dashboard = () => {
 		return (
 			<div>
 				<h3>Welcome</h3>
-				<p>Dayoff is a chat community where you're allowed one post every 24 hours.</p>
+				<p>Dayoff is a chat community where you're allowed one post at a time.</p>
 				<Button onClick={() => showLogin()}>Get started.</Button>
 			</div>
 		);
