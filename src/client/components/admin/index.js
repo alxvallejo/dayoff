@@ -9,7 +9,6 @@ import { Activity } from './activity';
 export const AdminDash = (props) => {
 	const [{ user }, userDispatch] = useContext(UserContext);
 	const [{ cities, selectedState, city }, adminDispatch] = useContext(AdminContext);
-	console.log('city at admin index: ', city);
 
 	return (
 		<Container>
@@ -19,25 +18,19 @@ export const AdminDash = (props) => {
 					<Col sm={3}>
 						<Nav variant="pills" className="flex-column">
 							<Nav.Item>
-								<Nav.Link eventKey="suggestions">Suggestions</Nav.Link>
-							</Nav.Item>
-							<Nav.Item>
 								<Nav.Link eventKey="activity">Activity</Nav.Link>
 							</Nav.Item>
 							<Nav.Item>
-								<Nav.Link eventKey="second">Users</Nav.Link>
+								<Nav.Link eventKey="users">Users</Nav.Link>
 							</Nav.Item>
 						</Nav>
 					</Col>
 					<Col sm={9}>
 						<Tab.Content>
-							<Tab.Pane eventKey="suggestions">
-								<Suggestions />
-							</Tab.Pane>
 							<Tab.Pane eventKey="activity">
 								<Activity />
 							</Tab.Pane>
-							<Tab.Pane eventKey="second">
+							<Tab.Pane eventKey="users">
 								<Users />
 							</Tab.Pane>
 						</Tab.Content>

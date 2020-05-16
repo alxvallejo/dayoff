@@ -27,8 +27,6 @@ const App = () => {
 	const [isAdmin, setIsAdmin] = useState();
 
 	useEffect(() => {
-		console.log('app use effect');
-
 		const checkUser = async () => {
 			firebaseAuth.onAuthStateChanged(async (u) => {
 				console.log('user on app load: ', u);
@@ -58,7 +56,6 @@ const App = () => {
 								// INBOX
 								firebaseDb.ref(`inbox/${u.uid}`).on('value', (snapshot) => {
 									const results = snapshot.val();
-									console.log('results: ', results);
 									if (results) {
 										let filteredInbox = map(results);
 

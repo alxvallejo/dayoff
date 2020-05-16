@@ -11,17 +11,7 @@ import { firebaseAuth } from '../services/firebase';
 export const TopNav = () => {
 	const [{ user, options, inbox }, userDispatch] = useContext(UserContext);
 	const [{ statuses }, statusDispatch] = useContext(StatusContext);
-	console.log('inbox at topNav: ', inbox);
-	const [showLocationModal, setLocationModal] = useState();
 	const [selectedState, setSelectedState] = useState();
-
-	const handleLocationClose = (location) => {
-		setLocationModal(null);
-	};
-
-	const setLocation = () => {
-		setLocationModal(true);
-	};
 
 	const signOut = () => {
 		firebaseAuth
@@ -52,7 +42,6 @@ export const TopNav = () => {
 
 	const inboxOverlay = () => {
 		const selectMsg = async (inboxMsg) => {
-			console.log('inboxMsg: ', inboxMsg);
 			const foundstatus = statuses.find((x) => x.uid === inboxMsg.statusUid);
 			if (!foundstatus) {
 				console.log('Could not find this status!');
@@ -112,7 +101,7 @@ export const TopNav = () => {
 			</Navbar>
 		);
 	} else {
-		const { displayName, photoURL } = user;
+		const { photoURL } = user;
 
 		return (
 			<Navbar expand="lg">
@@ -135,8 +124,8 @@ export const TopNav = () => {
 						</a>
 						{showInbox()}
 					</Row>
-					{defaultNav()}
 					<SecondNav />
+					{defaultNav()}
 				</div>
 			</Navbar>
 		);

@@ -1,20 +1,19 @@
-import React, { useContext, useReducer, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 
-import { Container, Row, Col, Button, Form } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import { useFormik } from 'formik';
 import { firebaseDb } from '../services/firebase';
 import { UserContext } from '../context/UserContext';
-import { states } from './admin/states';
 import { getPrefCategory } from '../utils/User';
 import InputMask from 'react-input-mask';
 const moment = require('moment');
 
 const genders = ['Male', 'Female'];
+const statuses = ['Single', 'Taken'];
 const preferences = ['Male', 'Female'];
 
 export const Profile = () => {
 	const [{ user, profile }, userDispatch] = useContext(UserContext);
-	console.log('profile: ', profile);
 
 	const preferenceLabel = (field, pref, index) => {
 		return (
@@ -63,6 +62,7 @@ export const Profile = () => {
 					displayName: user.displayName,
 					birthday: profile.birthday,
 					gender: profile.gender,
+					status: profile.status,
 					location: profile.location,
 					preference: profile.preference,
 			  }
@@ -70,6 +70,7 @@ export const Profile = () => {
 					displayName: '',
 					birthday: '',
 					gender: '',
+					status: '',
 					location: '',
 					preference: '',
 			  };
@@ -107,7 +108,6 @@ export const Profile = () => {
 		enableReinitialize: true,
 	});
 	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
-	console.log('values: ', values);
 
 	return (
 		<div>
@@ -144,6 +144,11 @@ export const Profile = () => {
 					<Form.Group>
 						<Form.Label>Gender</Form.Label>
 						<Form.Row>{genders.map((gender, index) => preferenceLabel('gender', gender, index))}</Form.Row>
+					</Form.Group>
+
+					<Form.Group>
+						<Form.Label>Status</Form.Label>
+						<Form.Row>{statuses.map((status, index) => preferenceLabel('status', status, index))}</Form.Row>
 					</Form.Group>
 
 					<Form.Group>

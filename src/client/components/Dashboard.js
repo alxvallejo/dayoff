@@ -20,7 +20,6 @@ export const Dashboard = () => {
 	useEffect(() => {
 		const room =
 			options && options.preference === 'Dating' && profile && profile.prefCategory ? profile.pref : 'Hangout';
-		console.log('room', room);
 		firebaseDb.ref(`statuses/${room}`).on('value', (snapshot) => {
 			const results = snapshot.val();
 			if (results) {
@@ -30,7 +29,6 @@ export const Dashboard = () => {
 						key,
 					};
 				});
-				// let filteredStatuses = map(results);
 				filteredStatuses = orderBy(filteredStatuses, 'time', 'desc');
 				statusDispatch({
 					type: 'SET_STATUSES',
@@ -45,12 +43,25 @@ export const Dashboard = () => {
 		});
 	}, [profile, options]);
 
+	const showLogin = () => {
+		userDispatch({ type: 'SHOW_LOGIN', showLogin: true });
+	};
+
+	const openChat = (status) => {
+		if (!user) {
+			showLogin();
+		} else {
+			statusDispatch({ type: 'SET_STATUS', status: status });
+		}
+	};
+
 	const contactButton = (status) => {
 		if (user && status.uid === user.uid) {
 			return null;
 		}
+
 		return (
-			<a onClick={() => statusDispatch({ type: 'SET_STATUS', status: status })}>
+			<a onClick={() => openChat()}>
 				<Badge variant="secondary">Chat</Badge>
 			</a>
 		);
@@ -61,7 +72,7 @@ export const Dashboard = () => {
 			<div>
 				<h3>Welcome</h3>
 				<p>Dayoff is a chat community where you're allowed one post every 24 hours.</p>
-				<Button onClick={() => userDispatch({ type: 'SHOW_LOGIN', showLogin: true })}>Get started.</Button>
+				<Button onClick={() => showLogin()}>Get started.</Button>
 			</div>
 		);
 	};
@@ -74,7 +85,6 @@ export const Dashboard = () => {
 					<div>
 						{statuses &&
 							statuses.map((status, i) => {
-								console.log('status: ', status);
 								const displayDate = moment.unix(status.time).fromNow();
 
 								return (
