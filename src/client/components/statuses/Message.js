@@ -172,7 +172,7 @@ export const Message = ({ status }) => {
 			// Float right
 			return (
 				<div className="message d-flex flex-column align-items-end">
-					<div className="message-content right mb-1">{message.message}</div>
+					<div className="message-content yours right mb-1">{message.message}</div>
 					<div className="message-byline">
 						{message.displayName} {timeDisplay}
 					</div>
@@ -181,7 +181,7 @@ export const Message = ({ status }) => {
 		} else {
 			return (
 				<div className="message d-flex flex-column align-items-start">
-					<div className="message-content mb-1">{message.message}</div>
+					<div className="message-content theirs mb-1">{message.message}</div>
 					<div className="message-byline">
 						{message.displayName} {timeDisplay}
 					</div>

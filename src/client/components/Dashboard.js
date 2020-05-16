@@ -61,7 +61,7 @@ export const Dashboard = () => {
 		}
 
 		return (
-			<a onClick={() => openChat()}>
+			<a onClick={() => openChat(status)}>
 				<Badge variant="secondary">Chat</Badge>
 			</a>
 		);
