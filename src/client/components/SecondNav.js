@@ -18,7 +18,7 @@ export const SecondNav = () => {
 				...options,
 				preference: newPref,
 			};
-			firebaseDb.ref(`users/${user.uid}/options`).set(newOptions);
+			firebaseDb.ref(`user/${user.uid}/options`).set(newOptions);
 			userDispatch({
 				type: 'SET_OPTIONS',
 				options: newOptions,

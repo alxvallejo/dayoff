@@ -112,12 +112,18 @@ export const Message = ({ status }) => {
 					};
 				}
 
+				let requests = [];
+
 				if (!convo) {
-					firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true });
-					firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false });
+					requests.push(firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true }));
+					requests.push(
+						firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false })
+					);
 				} else {
 					let otherUid = convo.statusUid === user.uid ? convo.replyUid : convo.statusUid;
-					firebaseDb.ref(`inbox/${otherUid}/${convoKey}`).set({ ...newConvoInfo, read: false });
+					requests.push(
+						firebaseDb.ref(`inbox/${otherUid}/${convoKey}`).set({ ...newConvoInfo, read: false })
+					);
 				}
 
 				const payload = {
@@ -128,12 +134,28 @@ export const Message = ({ status }) => {
 					time: unix,
 				};
 
-				firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload);
+				requests.push(firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload));
+
+				await Promise.all(requests);
+
+				resetForm();
+				setSubmitting(false);
 			}
 		},
 		enableReinitialize: true,
 	});
-	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
+	const {
+		handleChange,
+		handleSubmit,
+		values,
+		setFieldValue,
+		errors,
+		touched,
+		isSubmitting,
+		setSubmitting,
+		resetForm,
+		innerRef,
+	} = formik;
 
 	const displayInitialstatus = () => {
 		if (!status) {
