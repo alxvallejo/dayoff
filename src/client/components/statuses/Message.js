@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Image, Row, Col, Badge, Form, Button, Modal } from 'react-bootstrap';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Col, Form, Button } from 'react-bootstrap';
 import { firebaseDb } from '../../services/firebase';
 import { UserContext } from '../../context/UserContext';
 import { StatusContext } from '../../context/StatusContext';
-import { useFormik } from 'formik';
+// import { useFormik } from 'formik';
+import { Formik } from 'formik';
 import { map } from 'lodash';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
@@ -16,6 +17,14 @@ export const Message = ({ status }) => {
 	const [convoKey, setConvoKey] = useState();
 	const [newConvo, setNewConvo] = useState();
 	const [convo, setConvo] = useState();
+
+	const inputRef = useRef();
+
+	const focus = () => {
+		if (inputRef.current) {
+			inputRef.current.focus();
+		}
+	};
 
 	const convoListener = (convoID) => {
 		firebaseDb.ref(`messages/${status.room}/${convoID}`).on('value', (snapshot) => {
@@ -51,6 +60,7 @@ export const Message = ({ status }) => {
 	};
 
 	useEffect(() => {
+		focus();
 		getConvo();
 
 		return () => {
@@ -72,90 +82,91 @@ export const Message = ({ status }) => {
 	const initialValues = {
 		message: '',
 	};
-	const formik = useFormik({
-		initialValues,
-		validate,
-		onSubmit: async (values) => {
-			if (!user) {
-				userDispatch({
-					type: 'SHOW_LOGIN',
-					showLogin: true,
-				});
-			} else {
-				const unix = moment().unix();
 
-				let newConvoInfo;
+	const handleMessage = async (values) => {
+		if (!user) {
+			userDispatch({
+				type: 'SHOW_LOGIN',
+				showLogin: true,
+			});
+		} else {
+			const unix = moment().unix();
 
-				if (convo) {
-					newConvoInfo = {
-						...convo,
-						time: unix,
-						lastUid: user.uid,
-						message: values.message,
-						lastDisplayName: profile.displayName,
-					};
-				} else {
-					newConvoInfo = {
-						key: convoKey,
-						room: status.room,
-						statusID: status.key,
-						statusUid: status.uid,
-						statusDisplayName: status.displayName,
-						statusPhoto: status.photoURL,
-						replyUid: user.uid,
-						replyDisplayName: profile.displayName,
-						replyPhoto: user.photoURL,
-						time: unix,
-						lastUid: user.uid,
-						message: values.message,
-						lastDisplayName: profile.displayName,
-					};
-				}
+			let newConvoInfo;
 
-				let requests = [];
-
-				if (!convo) {
-					requests.push(firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true }));
-					requests.push(
-						firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false })
-					);
-				} else {
-					let otherUid = convo.statusUid === user.uid ? convo.replyUid : convo.statusUid;
-					requests.push(
-						firebaseDb.ref(`inbox/${otherUid}/${convoKey}`).set({ ...newConvoInfo, read: false })
-					);
-				}
-
-				const payload = {
-					...values,
-					statusUid: status.uid,
-					uid: user.uid,
-					displayName: user.displayName,
+			if (convo) {
+				newConvoInfo = {
+					...convo,
 					time: unix,
+					lastUid: user.uid,
+					message: values.message,
+					lastDisplayName: profile.displayName,
 				};
-
-				requests.push(firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload));
-
-				await Promise.all(requests);
-
-				resetForm();
-				setSubmitting(false);
+			} else {
+				newConvoInfo = {
+					key: convoKey,
+					room: status.room,
+					statusID: status.key,
+					statusUid: status.uid,
+					statusDisplayName: status.displayName,
+					statusPhoto: status.photoURL,
+					replyUid: user.uid,
+					replyDisplayName: profile.displayName,
+					replyPhoto: user.photoURL,
+					time: unix,
+					lastUid: user.uid,
+					message: values.message,
+					lastDisplayName: profile.displayName,
+				};
 			}
-		},
-		enableReinitialize: true,
-	});
-	const {
-		handleChange,
-		handleSubmit,
-		values,
-		setFieldValue,
-		errors,
-		touched,
-		isSubmitting,
-		setSubmitting,
-		resetForm,
-		innerRef,
-	} = formik;
+
+			let requests = [];
+
+			if (!convo) {
+				requests.push(firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true }));
+				requests.push(firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false }));
+			} else {
+				let otherUid = convo.statusUid === user.uid ? convo.replyUid : convo.statusUid;
+				requests.push(firebaseDb.ref(`inbox/${otherUid}/${convoKey}`).set({ ...newConvoInfo, read: false }));
+			}
+
+			const payload = {
+				...values,
+				statusUid: status.uid,
+				uid: user.uid,
+				displayName: user.displayName,
+				time: unix,
+			};
+
+			requests.push(firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload));
+
+			await Promise.all(requests);
+
+			resetForm();
+			setSubmitting(false);
+		}
+	};
+
+	// const formik = useFormik({
+	// 	initialValues,
+	// 	validate,
+	// 	onSubmit: async (values) => {
+
+	// 	},
+	// 	enableReinitialize: true,
+	// });
+	// const {
+	// 	handleChange,
+	// 	handleSubmit,
+	// 	values,
+	// 	setFieldValue,
+	// 	errors,
+	// 	touched,
+	// 	isSubmitting,
+	// 	setSubmitting,
+	// 	resetForm,
+	// 	// innerRef,
+	// } = formik;
 
 	const displayInitialstatus = () => {
 		if (!status) {
@@ -212,13 +223,10 @@ export const Message = ({ status }) => {
 		}
 	};
 
-	const handleFormSubmit = (values, { setSubmitting, resetForm }) => {
-		handleSave(values, () => {
-			resetForm(initialValues);
-		});
-
-		setSubmitting(false);
-	};
+	// const handleFormSubmit = async (e) => {
+	// 	e.preventDefault();
+	// 	handleSubmit(values);
+	// };
 
 	return (
 		<Col>
@@ -233,21 +241,42 @@ export const Message = ({ status }) => {
 						);
 					})}
 			</div>
-			<Form onSubmit={handleFormSubmit} inline>
-				<Form.Group className="flex-grow-1">
-					<Form.Control
-						className="flex-grow-1"
-						type="text"
-						name="message"
-						onChange={handleChange}
-						autoComplete="off"
-						// placeholder={placeholder()}
-					/>
-					<Button variant="outline-primary" type="submit" disabled={isSubmitting} className="ml-3">
-						Send
-					</Button>
-				</Form.Group>
-			</Form>
+			<Formik
+				initialValues={initialValues}
+				validate={validate}
+				onSubmit={handleMessage}
+				enableReinitialize={true}
+			>
+				{({ handleSubmit, handleChange, handleBlur, values, isSubmitting, setSubmitting, resetForm }) => (
+					<Form onSubmit={handleSubmit} inline>
+						<Form.Group className="flex-grow-1">
+							{/* <Form.Control
+								className="flex-grow-1"
+								type="text"
+								name="message"
+								onChange={handleChange}
+								autoComplete="off"
+								autoFocus
+								ref={inputRef}
+								value={values.message}
+								// placeholder={placeholder()}
+							/> */}
+							<input
+								autoFocus
+								type="text"
+								name="message"
+								onChange={handleChange}
+								autoComplete="off"
+								value={values.message}
+							/>
+							<Button variant="outline-primary" type="submit" disabled={isSubmitting} className="ml-3">
+								Send
+							</Button>
+						</Form.Group>
+						<input hidden type="submit" />
+					</Form>
+				)}
+			</Formik>
 		</Col>
 	);
 };
