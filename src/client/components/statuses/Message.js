@@ -1,28 +1,28 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Col, Form, Button } from 'react-bootstrap';
+import { Col, Button } from 'react-bootstrap';
 import { firebaseDb } from '../../services/firebase';
 import { UserContext } from '../../context/UserContext';
 import { StatusContext } from '../../context/StatusContext';
-// import { useFormik } from 'formik';
 import { Formik } from 'formik';
 import { map } from 'lodash';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
+import ScrollToBottom from 'react-scroll-to-bottom';
+
 const moment = require('moment');
 
 export const Message = ({ status }) => {
-	const [{ user, profile, inbox }, userDispatch] = useContext(UserContext);
-	// const [{ user, location, inbox }, statusDispatch] = useContext(UserContext);
+	const [{ user, location, inbox }, statusDispatch] = useContext(UserContext);
 	const [messages, setMessages] = useState();
 	const [convoKey, setConvoKey] = useState();
 	const [newConvo, setNewConvo] = useState();
 	const [convo, setConvo] = useState();
 
-	const inputRef = useRef();
+	const lastMsg = useRef();
 
-	const focus = () => {
-		if (inputRef.current) {
-			inputRef.current.focus();
+	const scrollToBottom = () => {
+		if (lastMsg.current) {
+			lastMsg.current.scrollIntoView({ behavior: 'smooth' });
 		}
 	};
 
@@ -30,7 +30,12 @@ export const Message = ({ status }) => {
 		firebaseDb.ref(`messages/${status.room}/${convoID}`).on('value', (snapshot) => {
 			const results = snapshot.val();
 			if (results) {
-				setMessages(map(results));
+				let filteredResults = map(results);
+				let lastMsg = filteredResults.pop();
+				filteredResults.push({ ...lastMsg, lastMsg: true });
+
+				setMessages(filteredResults);
+				scrollToBottom();
 			}
 		});
 	};
@@ -60,7 +65,6 @@ export const Message = ({ status }) => {
 	};
 
 	useEffect(() => {
-		focus();
 		getConvo();
 
 		return () => {
@@ -70,103 +74,6 @@ export const Message = ({ status }) => {
 			}
 		};
 	}, []);
-
-	const validate = (values) => {
-		const errors = {};
-		if (!values.message) {
-			errors.message = 'Required';
-		}
-		return errors;
-	};
-
-	const initialValues = {
-		message: '',
-	};
-
-	const handleMessage = async (values) => {
-		if (!user) {
-			userDispatch({
-				type: 'SHOW_LOGIN',
-				showLogin: true,
-			});
-		} else {
-			const unix = moment().unix();
-
-			let newConvoInfo;
-
-			if (convo) {
-				newConvoInfo = {
-					...convo,
-					time: unix,
-					lastUid: user.uid,
-					message: values.message,
-					lastDisplayName: profile.displayName,
-				};
-			} else {
-				newConvoInfo = {
-					key: convoKey,
-					room: status.room,
-					statusID: status.key,
-					statusUid: status.uid,
-					statusDisplayName: status.displayName,
-					statusPhoto: status.photoURL,
-					replyUid: user.uid,
-					replyDisplayName: profile.displayName,
-					replyPhoto: user.photoURL,
-					time: unix,
-					lastUid: user.uid,
-					message: values.message,
-					lastDisplayName: profile.displayName,
-				};
-			}
-
-			let requests = [];
-
-			if (!convo) {
-				requests.push(firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true }));
-				requests.push(firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false }));
-			} else {
-				let otherUid = convo.statusUid === user.uid ? convo.replyUid : convo.statusUid;
-				requests.push(firebaseDb.ref(`inbox/${otherUid}/${convoKey}`).set({ ...newConvoInfo, read: false }));
-			}
-
-			const payload = {
-				...values,
-				statusUid: status.uid,
-				uid: user.uid,
-				displayName: user.displayName,
-				time: unix,
-			};
-
-			requests.push(firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload));
-
-			await Promise.all(requests);
-
-			resetForm();
-			setSubmitting(false);
-		}
-	};
-
-	// const formik = useFormik({
-	// 	initialValues,
-	// 	validate,
-	// 	onSubmit: async (values) => {
-
-	// 	},
-	// 	enableReinitialize: true,
-	// });
-	// const {
-	// 	handleChange,
-	// 	handleSubmit,
-	// 	values,
-	// 	setFieldValue,
-	// 	errors,
-	// 	touched,
-	// 	isSubmitting,
-	// 	setSubmitting,
-	// 	resetForm,
-	// 	// innerRef,
-	// } = formik;
 
 	const displayInitialstatus = () => {
 		if (!status) {
@@ -201,12 +108,13 @@ export const Message = ({ status }) => {
 
 	const displayMessage = (message, i) => {
 		const timeDisplay = moment.unix(message.time).fromNow();
+		const ref = message.lastMsg ? lastMsg : null;
 		if (message.uid === user.uid) {
 			// Float right
 			return (
 				<div className="message d-flex flex-column align-items-end">
 					<div className="message-content yours right mb-1">{message.message}</div>
-					<div className="message-byline">
+					<div className="message-byline" ref={ref}>
 						{message.displayName} {timeDisplay}
 					</div>
 				</div>
@@ -215,7 +123,7 @@ export const Message = ({ status }) => {
 			return (
 				<div className="message d-flex flex-column align-items-start">
 					<div className="message-content theirs mb-1">{message.message}</div>
-					<div className="message-byline">
+					<div className="message-byline" ref={ref}>
 						{message.displayName} {timeDisplay}
 					</div>
 				</div>
@@ -223,60 +131,22 @@ export const Message = ({ status }) => {
 		}
 	};
 
-	// const handleFormSubmit = async (e) => {
-	// 	e.preventDefault();
-	// 	handleSubmit(values);
-	// };
-
 	return (
-		<Col>
-			<div className="mb-3">
-				{displayInitialstatus()}
-				{messages &&
-					messages.map((message, i) => {
-						return (
-							<div key={i} className="py-3">
-								{displayMessage(message, i)}
-							</div>
-						);
-					})}
-			</div>
-			<Formik
-				initialValues={initialValues}
-				validate={validate}
-				onSubmit={handleMessage}
-				enableReinitialize={true}
-			>
-				{({ handleSubmit, handleChange, handleBlur, values, isSubmitting, setSubmitting, resetForm }) => (
-					<Form onSubmit={handleSubmit} inline>
-						<Form.Group className="flex-grow-1">
-							{/* <Form.Control
-								className="flex-grow-1"
-								type="text"
-								name="message"
-								onChange={handleChange}
-								autoComplete="off"
-								autoFocus
-								ref={inputRef}
-								value={values.message}
-								// placeholder={placeholder()}
-							/> */}
-							<input
-								autoFocus
-								type="text"
-								name="message"
-								onChange={handleChange}
-								autoComplete="off"
-								value={values.message}
-							/>
-							<Button variant="outline-primary" type="submit" disabled={isSubmitting} className="ml-3">
-								Send
-							</Button>
-						</Form.Group>
-						<input hidden type="submit" />
-					</Form>
-				)}
-			</Formik>
-		</Col>
+		<ScrollToBottom>
+			<Col>
+				<div className="mb-3">
+					{displayInitialstatus()}
+					{messages &&
+						messages.map((message, i) => {
+							return (
+								<div key={i} className="py-3">
+									{displayMessage(message, i)}
+								</div>
+							);
+						})}
+				</div>
+				<div hidden ref={lastMsg} />
+			</Col>
+		</ScrollToBottom>
 	);
 };

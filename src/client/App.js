@@ -16,6 +16,7 @@ import { Footer } from './components/Footer';
 import { AdminDash } from './components/admin';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { Message } from './components/statuses/Message';
+import { MessageInput } from './components/statuses/MessageInput';
 import { Profile } from './components/Profile';
 
 import { firebaseAuth, firebaseDb } from './services/firebase';
@@ -214,13 +215,21 @@ const App = () => {
 					<Profile />
 				</Modal.Body>
 			</Modal>
-			<Modal show={!!status} onHide={() => statusDispatch({ type: 'SET_STATUS', status: null })} centered>
+			<Modal
+				show={!!status}
+				onHide={() => statusDispatch({ type: 'SET_STATUS', status: null })}
+				centered
+				scrollable
+			>
 				<Modal.Header closeButton>
 					<Modal.Title>{`Chat with ${status && status.displayName}`}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<Message status={status} />
 				</Modal.Body>
+				<Modal.Footer className="d-flex">
+					<MessageInput status={status} className="flex-grow" />
+				</Modal.Footer>
 			</Modal>
 		</BrowserRouter>
 	);

@@ -2,7 +2,14 @@
 	// max-width: 60%;
 	.message-content {
 		max-width: 60%;
-		&.right {
+		font-size: 13px;
+		font-weight: bold;
+		&.theirs {
+			padding: 7px;
+			background-color: $secondary;
+			border-radius: 5px;
+			color: white;
+			position: relative;
 		}
 	}
 	.message-byline {
