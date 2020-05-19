@@ -105,6 +105,7 @@ export const LoginForm = () => {
 
 			const profile_payload = {
 				uid,
+				displayName: values.displayName,
 				birthday: values.birthday,
 				age,
 				modified: unix,
