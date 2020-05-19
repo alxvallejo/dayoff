@@ -87,7 +87,7 @@ export const MessageInput = ({ status }) => {
 				...values,
 				statusUid: status.uid,
 				uid: user.uid,
-				displayName: user.displayName,
+				displayName: profile.displayName,
 				time: unix,
 			};
 
