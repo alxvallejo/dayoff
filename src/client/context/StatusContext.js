@@ -6,6 +6,7 @@ const initialStatus = {
 	statuses: null,
 	status: null,
 	convo: null,
+	convoKey: null,
 };
 
 const StatusReducer = (state, action) => {
@@ -24,6 +25,12 @@ const StatusReducer = (state, action) => {
 			return {
 				...state,
 				convo: action.convo,
+			};
+
+		case 'SET_CONVO_KEY':
+			return {
+				...state,
+				convoKey: action.convoKey,
 			};
 
 		default:

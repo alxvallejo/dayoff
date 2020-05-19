@@ -11,7 +11,8 @@ const moment = require('moment');
 
 export const MessageInput = ({ status }) => {
 	const [{ user, profile, inbox }, userDispatch] = useContext(UserContext);
-	const [{ convo }, statusDispatch] = useContext(StatusContext);
+	const [{ convo, convoKey }, statusDispatch] = useContext(StatusContext);
+	console.log('convo: ', convo);
 
 	const inputRef = useRef();
 
@@ -21,7 +22,7 @@ export const MessageInput = ({ status }) => {
 		}
 	};
 
-	useEffect(focus, []);
+	useEffect(focus, [convoKey]);
 
 	const initialValues = {
 		message: '',
@@ -56,15 +57,15 @@ export const MessageInput = ({ status }) => {
 				};
 			} else {
 				newConvoInfo = {
-					key: convo.key,
+					key: convoKey,
 					room: status.room,
 					statusID: status.key,
 					statusUid: status.uid,
 					statusDisplayName: status.displayName,
-					statusPhoto: status.photoURL,
+					statusPhoto: status.photoURL || null,
 					replyUid: user.uid,
 					replyDisplayName: profile.displayName,
-					replyPhoto: user.photoURL,
+					replyPhoto: user.photoURL || null,
 					time: unix,
 					lastUid: user.uid,
 					message: values.message,
@@ -75,8 +76,8 @@ export const MessageInput = ({ status }) => {
 			let requests = [];
 
 			if (!convo) {
-				requests.push(firebaseDb.ref(`inbox/${user.uid}/${convo.key}`).set({ ...newConvoInfo, read: true }));
-				requests.push(firebaseDb.ref(`inbox/${status.uid}/${convo.key}`).set({ ...newConvoInfo, read: false }));
+				requests.push(firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true }));
+				requests.push(firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false }));
 			} else {
 				let otherUid = convo.statusUid === user.uid ? convo.replyUid : convo.statusUid;
 				requests.push(firebaseDb.ref(`inbox/${otherUid}/${convo.key}`).set({ ...newConvoInfo, read: false }));
@@ -90,7 +91,7 @@ export const MessageInput = ({ status }) => {
 				time: unix,
 			};
 
-			requests.push(firebaseDb.ref(`messages/${status.room}/${convo.key}`).push(payload));
+			requests.push(firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload));
 
 			await Promise.all(requests);
 
@@ -98,6 +99,10 @@ export const MessageInput = ({ status }) => {
 			setSubmitting(false);
 		}
 	};
+
+	if (!convoKey) {
+		return null;
+	}
 
 	return (
 		<Formik initialValues={initialValues} validate={validate} onSubmit={handleMessage} enableReinitialize={false}>

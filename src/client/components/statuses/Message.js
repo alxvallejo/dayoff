@@ -15,6 +15,7 @@ export const Message = ({ status }) => {
 	const [{ user, location, inbox }, userDispatch] = useContext(UserContext);
 	const [{ convo }, statusDispatch] = useContext(StatusContext);
 	const [messages, setMessages] = useState();
+	// const [convoKey, setConvoKey] = useState();
 	const [newConvo, setNewConvo] = useState();
 	// const [convo, setConvo] = useState();
 
@@ -24,6 +25,13 @@ export const Message = ({ status }) => {
 		if (lastMsg.current) {
 			lastMsg.current.scrollIntoView({ behavior: 'smooth' });
 		}
+	};
+
+	const setConvoKey = (convoKey) => {
+		statusDispatch({
+			type: 'SET_CONVO_KEY',
+			convoKey,
+		});
 	};
 
 	const convoListener = (convoID) => {
@@ -51,15 +59,18 @@ export const Message = ({ status }) => {
 						type: 'SET_CONVO',
 						convo: existingConvo,
 					});
+					setConvoKey(existingConvo.key);
 					firebaseDb.ref(`inbox/${user.uid}/${existingConvo.key}`).set({ ...existingConvo, read: true });
 				}
 			});
 		}
 
 		if (existingConvo) {
+			setConvoKey(existingConvo.key);
 			convoListener(existingConvo.key);
 		} else {
 			const newRef = await firebaseDb.ref(`messages/${status.room}/`).push();
+			setConvoKey(newRef.key);
 			setNewConvo(true);
 			convoListener(newRef.key);
 		}
