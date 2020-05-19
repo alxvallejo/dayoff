@@ -70,7 +70,9 @@ export const LoginForm = () => {
 				}
 			}
 		}
-
+		if (!values.status) {
+			errors.status = 'Required';
+		}
 		if (!values.gender) {
 			errors.gender = 'Required';
 		}

@@ -30,7 +30,7 @@ export const SecondNav = () => {
 		const currentPref = (options && options.preference) || 'Hangout';
 		return (
 			<div className="d-flex align-items-center">
-				{profile.status === 'Single' && (
+				{profile && profile.status === 'Single' && (
 					<Button
 						variant={currentPref === 'Dating' ? 'primary' : 'primary-outline'}
 						onClick={() => togglePref('Dating')}
