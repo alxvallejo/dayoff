@@ -11,6 +11,7 @@ const moment = require('moment');
 
 export const MessageInput = ({ status }) => {
 	const [{ user, profile, inbox }, userDispatch] = useContext(UserContext);
+	const [{ convo }, statusDispatch] = useContext(StatusContext);
 
 	const inputRef = useRef();
 
@@ -55,7 +56,7 @@ export const MessageInput = ({ status }) => {
 				};
 			} else {
 				newConvoInfo = {
-					key: convoKey,
+					key: convo.key,
 					room: status.room,
 					statusID: status.key,
 					statusUid: status.uid,
@@ -74,11 +75,11 @@ export const MessageInput = ({ status }) => {
 			let requests = [];
 
 			if (!convo) {
-				requests.push(firebaseDb.ref(`inbox/${user.uid}/${convoKey}`).set({ ...newConvoInfo, read: true }));
-				requests.push(firebaseDb.ref(`inbox/${status.uid}/${convoKey}`).set({ ...newConvoInfo, read: false }));
+				requests.push(firebaseDb.ref(`inbox/${user.uid}/${convo.key}`).set({ ...newConvoInfo, read: true }));
+				requests.push(firebaseDb.ref(`inbox/${status.uid}/${convo.key}`).set({ ...newConvoInfo, read: false }));
 			} else {
 				let otherUid = convo.statusUid === user.uid ? convo.replyUid : convo.statusUid;
-				requests.push(firebaseDb.ref(`inbox/${otherUid}/${convoKey}`).set({ ...newConvoInfo, read: false }));
+				requests.push(firebaseDb.ref(`inbox/${otherUid}/${convo.key}`).set({ ...newConvoInfo, read: false }));
 			}
 
 			const payload = {
@@ -89,7 +90,7 @@ export const MessageInput = ({ status }) => {
 				time: unix,
 			};
 
-			requests.push(firebaseDb.ref(`messages/${status.room}/${convoKey}`).push(payload));
+			requests.push(firebaseDb.ref(`messages/${status.room}/${convo.key}`).push(payload));
 
 			await Promise.all(requests);
 

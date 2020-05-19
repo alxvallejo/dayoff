@@ -12,11 +12,11 @@ import ScrollToBottom from 'react-scroll-to-bottom';
 const moment = require('moment');
 
 export const Message = ({ status }) => {
-	const [{ user, location, inbox }, statusDispatch] = useContext(UserContext);
+	const [{ user, location, inbox }, userDispatch] = useContext(UserContext);
+	const [{ convo }, statusDispatch] = useContext(StatusContext);
 	const [messages, setMessages] = useState();
-	const [convoKey, setConvoKey] = useState();
 	const [newConvo, setNewConvo] = useState();
-	const [convo, setConvo] = useState();
+	// const [convo, setConvo] = useState();
 
 	const lastMsg = useRef();
 
@@ -46,19 +46,20 @@ export const Message = ({ status }) => {
 			inbox.map((subscription) => {
 				if (subscription.statusUid === status.uid) {
 					existingConvo = subscription;
-					setConvo(existingConvo);
-					setConvoKey(existingConvo.key);
+					// setConvo(existingConvo);
+					statusDispatch({
+						type: 'SET_CONVO',
+						convo: existingConvo,
+					});
 					firebaseDb.ref(`inbox/${user.uid}/${existingConvo.key}`).set({ ...existingConvo, read: true });
 				}
 			});
 		}
 
 		if (existingConvo) {
-			setConvoKey(existingConvo.key);
 			convoListener(existingConvo.key);
 		} else {
 			const newRef = await firebaseDb.ref(`messages/${status.room}/`).push();
-			setConvoKey(newRef.key);
 			setNewConvo(true);
 			convoListener(newRef.key);
 		}
