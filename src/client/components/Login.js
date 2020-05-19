@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { firebaseAuth, googleAuth, facebookAuth } from '../services/firebase';
+import { firebaseAuth, googleAuth, facebookAuth, emailAuth } from '../services/firebase';
 // import firebase from 'firebase';
 import { UserContext } from '../context/UserContext';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
@@ -15,7 +15,7 @@ export const Login = ({ handleClose }) => {
 		signInFlow: 'popup',
 		// We will display Google and Facebook as auth providers.
 		// signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID, firebase.auth.FacebookAuthProvider.PROVIDER_ID],
-		signInOptions: [googleAuth.PROVIDER_ID],
+		signInOptions: [emailAuth.PROVIDER_ID, googleAuth.PROVIDER_ID],
 		callbacks: {
 			// Avoid redirects after sign-in.
 			signInSuccessWithAuthResult: (authResult, redirectUrl) => {
@@ -39,8 +39,8 @@ export const Login = ({ handleClose }) => {
 
 	return (
 		<Container className="login">
-			<div className="mb-4">
-				<h3>Login</h3>
+			<div className="mb-4 text-center font-weight-bold">
+				<p>Login to Dayoff</p>
 				<p>Only for verification purposes. Your data is never shared.</p>
 			</div>
 			<StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />

@@ -12,3 +12,4 @@ export const firebaseDb = firebase.database();
 
 export const googleAuth = firebase.auth.GoogleAuthProvider;
 export const facebookAuth = firebase.auth.FacebookAuthProvider;
+export const emailAuth = firebase.auth.EmailAuthProvider;

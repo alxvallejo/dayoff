@@ -86,9 +86,7 @@ export const Profile = () => {
 			} else {
 				const unix = moment().unix();
 				const prefCategory = getPrefCategory(values);
-				// const age = moment(values.birthday, 'MM/DD/YYYY')
 				const age = moment().diff(values.birthday, 'years');
-
 				const payload = {
 					...values,
 					uid: user.uid,
@@ -118,7 +116,7 @@ export const Profile = () => {
 				>
 					{/* <h3>Set your profile.</h3> */}
 					<Form.Group>
-						<Form.Label>Name</Form.Label>
+						<Form.Label>Username</Form.Label>
 						<Form.Control
 							type="text"
 							name="displayName"
@@ -170,11 +168,11 @@ export const Profile = () => {
 						</Form.Row>
 					</Form.Group>
 
-					<Form.Group>
+					{/* <Form.Group>
 						<Form.Label>Facebook URL</Form.Label>
 						<Form.Control type="text" name="facebook" onChange={handleChange} />
 						{errors.facebook && touched.facebook && errors.facebook}
-					</Form.Group>
+					</Form.Group> */}
 
 					<Button variant="outline-primary" type="submit" disabled={isSubmitting}>
 						Save Profile

@@ -5,7 +5,7 @@ import { Image, Row, Col, Badge, Container, Form, Button, Modal } from 'react-bo
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import { RequestForm } from './statuses/RequestForm';
-import { Profile } from './Profile';
+import { LoginForm } from './LoginForm';
 
 import { firebaseDb } from '../services/firebase';
 import { map, keys, orderBy } from 'lodash';
@@ -15,7 +15,7 @@ const moment = require('moment');
 export const Dashboard = () => {
 	const [{ user, options, profile }, userDispatch] = useContext(UserContext);
 	const [{ statuses }, statusDispatch] = useContext(StatusContext);
-	const [tab, setTab] = useState('driver');
+	const [loginForm, setLoginForm] = useState(false);
 
 	useEffect(() => {
 		const room =
@@ -47,6 +47,10 @@ export const Dashboard = () => {
 		userDispatch({ type: 'SHOW_LOGIN', showLogin: true });
 	};
 
+	const showLoginForm = () => {
+		setLoginForm(true);
+	};
+
 	const openChat = (status) => {
 		if (!user) {
 			showLogin();
@@ -72,7 +76,7 @@ export const Dashboard = () => {
 			<div>
 				<h3>Welcome</h3>
 				<p>Dayoff is a chat community where you're allowed one post at a time.</p>
-				<Button onClick={() => showLogin()}>Get started.</Button>
+				{loginForm ? <LoginForm /> : <Button onClick={() => showLoginForm()}>Get started.</Button>}
 			</div>
 		);
 	};
