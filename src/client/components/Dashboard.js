@@ -6,6 +6,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import { RequestForm } from './statuses/RequestForm';
 import { LoginForm } from './LoginForm';
+import { Profile } from './Profile';
 
 import { firebaseDb } from '../services/firebase';
 import { map, keys, orderBy } from 'lodash';
@@ -13,7 +14,7 @@ import { map, keys, orderBy } from 'lodash';
 const moment = require('moment');
 
 export const Dashboard = () => {
-	const [{ user, options, profile }, userDispatch] = useContext(UserContext);
+	const [{ user, options, profile, showProfile }, userDispatch] = useContext(UserContext);
 	const [{ statuses }, statusDispatch] = useContext(StatusContext);
 	const [loginForm, setLoginForm] = useState(false);
 
@@ -81,10 +82,24 @@ export const Dashboard = () => {
 		);
 	};
 
+	const viewLeftPanel = () => {
+		if (user && profile) {
+			if (loginForm) {
+				return <LoginForm />;
+			} else if (showProfile) {
+				return <Profile />;
+			} else {
+				return <RequestForm />;
+			}
+		} else {
+			return welcome();
+		}
+	};
+
 	return (
 		<Container>
 			<Row>
-				<Col>{profile ? <RequestForm /> : welcome()}</Col>
+				<Col>{viewLeftPanel()}</Col>
 				<Col className="ml-4">
 					<div>
 						{statuses &&

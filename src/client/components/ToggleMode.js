@@ -4,7 +4,7 @@ import { UserContext } from '../context/UserContext';
 import { Button } from 'react-bootstrap';
 import { firebaseDb } from '../services/firebase';
 
-export const SecondNav = () => {
+export const ToggleMode = () => {
 	const [{ user, options, profile }, userDispatch] = useContext(UserContext);
 
 	const togglePref = async (newPref) => {

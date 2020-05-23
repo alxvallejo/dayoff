@@ -203,7 +203,7 @@ const App = () => {
 					<Login handleClose={handleLoginClose} />
 				</Modal.Body>
 			</Modal>
-			<Modal
+			{/* <Modal
 				show={showProfile}
 				onHide={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: false })}
 				centered
@@ -214,7 +214,7 @@ const App = () => {
 				<Modal.Body>
 					<Profile />
 				</Modal.Body>
-			</Modal>
+			</Modal> */}
 			<Modal
 				show={!!status}
 				onHide={() => statusDispatch({ type: 'SET_STATUS', status: null })}

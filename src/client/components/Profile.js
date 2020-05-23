@@ -17,7 +17,7 @@ export const Profile = () => {
 
 	const preferenceLabel = (field, pref, index) => {
 		return (
-			<Form.Label key={index}>
+			<Form.Label key={index} className="form-check-inline">
 				<Button
 					variant={values[field] === pref ? 'primary' : 'primary-outline'}
 					checked={values[field] === pref}
@@ -59,7 +59,7 @@ export const Profile = () => {
 	const initialValues =
 		user && profile
 			? {
-					displayName: user.displayName,
+					displayName: profile.displayName,
 					birthday: profile.birthday,
 					gender: profile.gender,
 					status: profile.status,
@@ -107,13 +107,13 @@ export const Profile = () => {
 	});
 	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
 
+	const controlClass = ''; // text-center
+	const formClass = ''; // d-flex flex-column align-items-center justify-content-center text-center
+
 	return (
 		<div>
 			<div>
-				<Form
-					onSubmit={handleSubmit}
-					className="d-flex flex-column align-items-center justify-content-center text-center"
-				>
+				<Form onSubmit={handleSubmit}>
 					{/* <h3>Set your profile.</h3> */}
 					<Form.Group>
 						<Form.Label>Username</Form.Label>
@@ -122,7 +122,7 @@ export const Profile = () => {
 							name="displayName"
 							onChange={handleChange}
 							value={values.displayName}
-							className="text-center"
+							className={controlClass}
 						/>
 						{errors.displayName && touched.displayName && errors.displayName}
 					</Form.Group>
@@ -134,7 +134,7 @@ export const Profile = () => {
 							name="birthday"
 							onChange={handleChange}
 							value={values.birthday}
-							className="form-control text-center"
+							className="form-control"
 						/>
 						{errors.birthday && touched.birthday && errors.birthday}
 					</Form.Group>
@@ -156,7 +156,7 @@ export const Profile = () => {
 							name="location"
 							onChange={handleChange}
 							value={values.location}
-							className="text-center"
+							className={controlClass}
 						/>
 						{errors.location && touched.location && errors.location}
 					</Form.Group>

@@ -4,7 +4,7 @@ import { UserContext } from '../context/UserContext';
 import { StatusContext } from '../context/StatusContext';
 import { Row, Button, Nav, Navbar, NavDropdown, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
 import LinesEllipsis from 'react-lines-ellipsis';
-import { SecondNav } from './SecondNav';
+import { ToggleMode } from './ToggleMode';
 
 import { firebaseAuth } from '../services/firebase';
 
@@ -124,7 +124,7 @@ export const TopNav = () => {
 						</a>
 						{showInbox()}
 					</Row>
-					<SecondNav />
+					<ToggleMode />
 					{defaultNav()}
 				</div>
 			</Navbar>
