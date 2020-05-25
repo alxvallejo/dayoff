@@ -7,3 +7,4 @@ yarn.lock
 
 # src/client/services/config.js
 .firebase
+fcm/node_modules

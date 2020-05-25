@@ -95,7 +95,7 @@ export const Profile = () => {
 					photoURL: user.photoURL,
 					prefCategory,
 				};
-				await firebaseDb.ref(`user/${user.uid}/profile`).set(payload);
+				await firebaseDb.ref(`users/${user.uid}/profile`).set(payload);
 				userDispatch({
 					type: 'SET_PROFILE',
 					profile: payload,
@@ -115,6 +115,24 @@ export const Profile = () => {
 			<div>
 				<Form onSubmit={handleSubmit}>
 					{/* <h3>Set your profile.</h3> */}
+					<Form.Group>
+						<Form.Label>Profile Photo</Form.Label>
+						{profile.photoURL && (
+							<Col xs={6} md={4}>
+								<Image src={profile.photoURL} thumbnail />
+							</Col>
+						)}
+
+						<Form.Control
+							type="file"
+							name="photoURL"
+							onChange={handleChange}
+							value={values.photoURL}
+							className={controlClass}
+						/>
+						{errors.photoURL && touched.photoURL && errors.photoURL}
+					</Form.Group>
+
 					<Form.Group>
 						<Form.Label>Username</Form.Label>
 						<Form.Control

@@ -40,7 +40,7 @@ const App = () => {
 					}
 
 					// Get user info
-					const resp = await firebaseDb.ref(`user/${u.uid}`).once('value');
+					const resp = await firebaseDb.ref(`users/${u.uid}`).once('value');
 					const userInfo = resp.val();
 					console.log('userInfo: ', userInfo);
 					if (userInfo) {

@@ -116,7 +116,7 @@ export const LoginForm = () => {
 				location: values.location,
 				preference: values.preference,
 			};
-			await firebaseDb.ref(`user/${uid}/profile`).set(profile_payload);
+			await firebaseDb.ref(`users/${uid}/profile`).set(profile_payload);
 			userDispatch({
 				type: 'SET_PROFILE',
 				profile: profile_payload,
