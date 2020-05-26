@@ -9,6 +9,7 @@ const initialUser = {
 	favorites: [],
 	tutorial: null,
 	showLogin: false,
+	loginForm: false,
 	showProfile: false,
 	inbox: null,
 	lastStatus: null,
@@ -57,6 +58,12 @@ const UserReducer = (state, action) => {
 			return {
 				...state,
 				showLogin: action.showLogin,
+			};
+
+		case 'LOGIN_FORM':
+			return {
+				...state,
+				loginForm: action.loginForm,
 			};
 
 		case 'SHOW_PROFILE':

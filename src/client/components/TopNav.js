@@ -33,7 +33,12 @@ export const TopNav = () => {
 			<div>
 				<div className="d-flex align-self-center">
 					<a href="/" className="navbar-brand mr-0">
-						Dayoff
+						Day
+						<Image
+							src="https://img.icons8.com/color/48/000000/beach-ball.png"
+							style={{ marginTop: -4, width: 30 }}
+						/>
+						ff
 					</a>
 				</div>
 			</div>

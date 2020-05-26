@@ -14,11 +14,11 @@ import { map, keys, orderBy } from 'lodash';
 const moment = require('moment');
 
 export const Dashboard = () => {
-	const [{ user, options, profile, showProfile }, userDispatch] = useContext(UserContext);
+	const [{ user, options, profile, showProfile, loginForm }, userDispatch] = useContext(UserContext);
 	const [{ statuses }, statusDispatch] = useContext(StatusContext);
-	const [loginForm, setLoginForm] = useState(false);
 
 	useEffect(() => {
+		console.log('profile at dashboard', profile);
 		const room =
 			options && options.preference === 'Dating' && profile && profile.prefCategory ? profile.pref : 'Hangout';
 		firebaseDb.ref(`statuses/${room}`).on('value', (snapshot) => {
@@ -49,7 +49,11 @@ export const Dashboard = () => {
 	};
 
 	const showLoginForm = () => {
-		setLoginForm(true);
+		// setLoginForm(true);
+		userDispatch({
+			type: 'LOGIN_FORM',
+			loginForm: true,
+		});
 	};
 
 	const openChat = (status) => {

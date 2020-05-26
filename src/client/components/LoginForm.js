@@ -121,6 +121,10 @@ export const LoginForm = () => {
 				type: 'SET_PROFILE',
 				profile: profile_payload,
 			});
+			userDispatch({
+				type: 'LOGIN_FORM',
+				loginForm: false,
+			});
 		},
 		enableReinitialize: true,
 	});

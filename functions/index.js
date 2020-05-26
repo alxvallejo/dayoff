@@ -1,7 +1,9 @@
 const functions = require('firebase-functions');
-const gcs = require('@google-cloud/storage')();
+const { Storage } = require('@google-cloud/storage');
 const path = require('path');
 const sharp = require('sharp');
+
+const gcs = new Storage();
 
 const THUMB_MAX_WIDTH = 200;
 const THUMB_MAX_HEIGHT = 200;
@@ -9,9 +11,9 @@ const THUMB_MAX_HEIGHT = 200;
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-exports.generateThumbnail = functions.storage.object().onChange((event) => {
+exports.generateThumbnail = functions.storage.object().onFinalize(async (object) => {
 	//console.log("event is", event);
-	const object = event.data; // The Storage object.
+	// const object = event.data; // The Storage object.
 
 	const fileBucket = object.bucket; // The Storage bucket that contains the file.
 	const filePath = object.name; // File path in the bucket.
@@ -20,7 +22,7 @@ exports.generateThumbnail = functions.storage.object().onChange((event) => {
 	const metageneration = object.metageneration; // Number of times metadata has been generated. New objects have a value of 1.
 
 	// Exit if this is triggered on a file that is not an image.
-	if (!contentType.startsWith('application/octet-stream')) {
+	if (!contentType.startsWith('image/')) {
 		console.log('This is not an image.', object);
 		return;
 	}
@@ -71,7 +73,7 @@ exports.generateThumbnail = functions.storage.object().onChange((event) => {
 
 	// Create Sharp pipeline for resizing the image and use pipe to read from bucket read stream
 	const pipeline = sharp();
-	pipeline.rotate().resize(THUMB_MAX_WIDTH, THUMB_MAX_HEIGHT).max().pipe(thumbnailUploadStream);
+	pipeline.rotate().resize(THUMB_MAX_WIDTH, THUMB_MAX_HEIGHT).pipe(thumbnailUploadStream);
 
 	bucket.file(filePath).createReadStream().pipe(pipeline);
 
@@ -117,65 +119,3 @@ exports.generateThumbnail = functions.storage.object().onChange((event) => {
 		console.log('Thumbnail created successfully');
 	});
 });
-
-exports.setStatusPhoto = functions.database
-	.ref('/users/{uid}/profile/profile_pictures/0/thumbnail')
-	.onWrite((event) => {
-		const { uid } = event.params;
-		const uri = event.data.val();
-		if (!uri) {
-			console.log('no uri for the path i guess');
-			return;
-		}
-
-		// need to grab the setPool from profile
-		let snapshotProfile = admin
-			.database()
-			.ref('/users/' + uid + '/profile')
-			.once('value')
-			.then((snapshot) => {
-				let profile = snapshot.val();
-				let setPool = profile.setPool;
-				if (setPool) {
-					let status_ids = [];
-
-					// get user statuses
-					let snapshot = admin
-						.database()
-						.ref('/users/' + uid + '/statuses/')
-						.once('value')
-						.then((snapshot) => {
-							let yourStatuses = snapshot.val();
-							status_ids = Object.keys(yourStatuses).map((key) => {
-								let status = yourStatuses[key];
-								return status.id;
-							});
-
-							if (status_ids.length < 1) {
-								console.log('status ids length is less than 1');
-								return;
-							}
-
-							status_ids.forEach((status_id) => {
-								//console.log("status id is", status_id);
-								snapshot = admin
-									.database()
-									.ref('/statuses/' + setPool + '/' + status_id)
-									.once('value')
-									.then((snapshot) => {
-										let status = snapshot.val();
-										if (status) {
-											let updates = Object.assign({}, status, { photoURL: uri });
-											admin
-												.database()
-												.ref('/statuses/' + setPool + '/' + status_id)
-												.update(updates);
-										}
-									});
-							});
-
-							console.log('Finished syncing new photo with statuses');
-						});
-				}
-			});
-	});

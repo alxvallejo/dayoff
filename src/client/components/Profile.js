@@ -2,9 +2,10 @@ import React, { useContext } from 'react';
 
 import { Button, Form } from 'react-bootstrap';
 import { useFormik } from 'formik';
-import { firebaseDb } from '../services/firebase';
+import { firebaseDb, storageRef } from '../services/firebase';
 import { UserContext } from '../context/UserContext';
 import { getPrefCategory } from '../utils/User';
+import { AvatarSelection } from './profile/AvatarSelection';
 import InputMask from 'react-input-mask';
 const moment = require('moment');
 
@@ -62,6 +63,7 @@ export const Profile = () => {
 					displayName: profile.displayName,
 					birthday: profile.birthday,
 					gender: profile.gender,
+					avatar: profile.avatar,
 					status: profile.status,
 					location: profile.location,
 					preference: profile.preference,
@@ -70,6 +72,7 @@ export const Profile = () => {
 					displayName: '',
 					birthday: '',
 					gender: '',
+					avatar: '',
 					status: '',
 					location: '',
 					preference: '',
@@ -110,6 +113,14 @@ export const Profile = () => {
 	const controlClass = ''; // text-center
 	const formClass = ''; // d-flex flex-column align-items-center justify-content-center text-center
 
+	const handleImageSelect = async (e) => {
+		console.log('e.target.files', e.target.files);
+		const file = e.target.files[0];
+		const imageRef = storageRef.child(`profile_photos/${user.uid}`);
+		const snapshot = await imageRef.put(file);
+		console.log('snapshot: ', snapshot);
+	};
+
 	return (
 		<div>
 			<div>
@@ -126,7 +137,7 @@ export const Profile = () => {
 						<Form.Control
 							type="file"
 							name="photoURL"
-							onChange={handleChange}
+							onChange={handleImageSelect}
 							value={values.photoURL}
 							className={controlClass}
 						/>
@@ -160,6 +171,12 @@ export const Profile = () => {
 					<Form.Group>
 						<Form.Label>Gender</Form.Label>
 						<Form.Row>{genders.map((gender, index) => preferenceLabel('gender', gender, index))}</Form.Row>
+					</Form.Group>
+
+					<Form.Group>
+						<Form.Label>Avatar</Form.Label>
+						<AvatarSelection gender={values.gender} onSelect={(e) => setFieldValue('avatar', e)} />
+						{errors.avatar && touched.avatar && errors.avatar}
 					</Form.Group>
 
 					<Form.Group>
