@@ -5,11 +5,12 @@ import { StatusContext } from '../context/StatusContext';
 import { Row, Button, Nav, Navbar, NavDropdown, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
 import LinesEllipsis from 'react-lines-ellipsis';
 import { ToggleMode } from './ToggleMode';
+import { AvatarCircle } from './profile/Avatar';
 
 import { firebaseAuth } from '../services/firebase';
 
 export const TopNav = () => {
-	const [{ user, options, inbox }, userDispatch] = useContext(UserContext);
+	const [{ user, profile, options, inbox }, userDispatch] = useContext(UserContext);
 	const [{ statuses }, statusDispatch] = useContext(StatusContext);
 	const [selectedState, setSelectedState] = useState();
 
@@ -106,14 +107,12 @@ export const TopNav = () => {
 			</Navbar>
 		);
 	} else {
-		const { photoURL } = user;
-
 		return (
 			<Navbar expand="lg">
 				<div className="container">
 					<Row className="align-items-center">
 						<NavDropdown
-							title={<Image roundedCircle src={photoURL} className="img-thumbnail" />}
+							title={<AvatarCircle profile={profile} width={50} className="img-thumbnail" />}
 							id="basic-nav-dropdown"
 						>
 							<NavDropdown.Item href="/admin">Admin</NavDropdown.Item>

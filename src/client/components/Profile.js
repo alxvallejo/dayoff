@@ -1,11 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Col } from 'react-bootstrap';
 import { useFormik } from 'formik';
 import { firebaseDb, storageRef } from '../services/firebase';
 import { UserContext } from '../context/UserContext';
 import { getPrefCategory } from '../utils/User';
 import { AvatarSelection } from './profile/AvatarSelection';
+import { Avatar } from './profile/Avatar';
 import InputMask from 'react-input-mask';
 const moment = require('moment');
 
@@ -15,6 +16,10 @@ const preferences = ['Male', 'Female'];
 
 export const Profile = () => {
 	const [{ user, profile }, userDispatch] = useContext(UserContext);
+
+	useEffect(() => {
+		// Listen for changes on profile
+	}, []);
 
 	const preferenceLabel = (field, pref, index) => {
 		return (
@@ -116,7 +121,10 @@ export const Profile = () => {
 	const handleImageSelect = async (e) => {
 		console.log('e.target.files', e.target.files);
 		const file = e.target.files[0];
-		const imageRef = storageRef.child(`profile_photos/${user.uid}`);
+		const imgPath = `profile_photos/${user.uid}/${file.name}`;
+		const userStoragePath = `profile_photos/${user.uid}`;
+		const imageRef = storageRef.child(imgPath);
+		const userStorageRef = storageRef.child(userStoragePath);
 		const snapshot = await imageRef.put(file);
 		console.log('snapshot: ', snapshot);
 	};
@@ -128,11 +136,9 @@ export const Profile = () => {
 					{/* <h3>Set your profile.</h3> */}
 					<Form.Group>
 						<Form.Label>Profile Photo</Form.Label>
-						{profile.photoURL && (
-							<Col xs={6} md={4}>
-								<Image src={profile.photoURL} thumbnail />
-							</Col>
-						)}
+						<Col xs={6} md={4}>
+							<Avatar profile={profile} />
+						</Col>
 
 						<Form.Control
 							type="file"
