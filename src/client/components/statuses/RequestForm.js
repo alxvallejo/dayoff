@@ -70,7 +70,7 @@ export const RequestForm = () => {
 					displayName: profile.displayName,
 					age: profile.age,
 					time: values.time || unix,
-					photoURL: user.photoURL || null,
+					photoURL: (profile.photo && profile.photo.thumbnail) || null,
 					room,
 				};
 				await firebaseDb.ref(`statuses/${room}/${user.uid}`).set(payload);

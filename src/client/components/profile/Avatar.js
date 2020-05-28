@@ -18,6 +18,17 @@ export const AvatarCircle = ({ profile, width }) => {
 	return <div></div>;
 };
 
+export const AvatarStatus = ({ status, width }) => {
+	if (!status) {
+		return <div style={{ width: width, height: width }}></div>;
+	}
+	if (status.photoURL) {
+		return <Image src={status.photoURL} roundedCircle style={{ width: width, height: width }} />;
+	} else {
+		return <div style={{ width: width, height: width }}></div>;
+	}
+};
+
 export const Avatar = ({ profile }) => {
 	if (!profile) {
 		return <div></div>;

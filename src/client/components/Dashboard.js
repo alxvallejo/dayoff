@@ -7,6 +7,7 @@ import 'react-quill/dist/quill.bubble.css';
 import { RequestForm } from './statuses/RequestForm';
 import { LoginForm } from './LoginForm';
 import { Profile } from './Profile';
+import { AvatarStatus } from './profile/Avatar';
 
 import { firebaseDb } from '../services/firebase';
 import { map, keys, orderBy } from 'lodash';
@@ -111,28 +112,22 @@ export const Dashboard = () => {
 								const displayDate = moment.unix(status.time).fromNow();
 
 								return (
-									<Row key={i}>
-										<div className="mr-4">
-											<Image roundedCircle src={status.photoURL} style={{ width: 50 }} />
-										</div>
-										<div>
-											<Row>
-												<div className="status-listing mb-3">
-													<div className="byline">
-														<span>
-															<b>{status.displayName}</b> <i>{displayDate}</i>
-														</span>
-													</div>
-													<ReactQuill
-														value={status.status}
-														readOnly={true}
-														theme={'bubble'}
-													/>
-													<div>{contactButton(status)}</div>
+									<div className="status-listing mb-3" key={i}>
+										<Row>
+											<Col className="mr-2" xs={3} className="d-flex justify-content-end">
+												<AvatarStatus status={status} width={50} />
+											</Col>
+											<Col>
+												<div className="byline">
+													<span>
+														<b>{status.displayName}</b> <i>{displayDate}</i>
+													</span>
 												</div>
-											</Row>
-										</div>
-									</Row>
+												<ReactQuill value={status.status} readOnly={true} theme={'bubble'} />
+												<div>{contactButton(status)}</div>
+											</Col>
+										</Row>
+									</div>
 								);
 							})}
 					</div>
