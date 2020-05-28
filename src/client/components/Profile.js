@@ -17,8 +17,24 @@ const preferences = ['Male', 'Female'];
 export const Profile = () => {
 	const [{ user, profile }, userDispatch] = useContext(UserContext);
 
+	const profileListener = () => {
+		firebaseDb.ref(`users/${user.uid}/profile`).on('value', (snapshot) => {
+			const updatedProfile = snapshot.val();
+			userDispatch({
+				type: 'SET_PROFILE',
+				profile: updatedProfile,
+			});
+		});
+	};
+
 	useEffect(() => {
 		// Listen for changes on profile
+		profileListener();
+
+		return () => {
+			// unmount listeners
+			firebaseDb.ref(`users/${user.uid}/profile`).off('value', profileListener());
+		};
 	}, []);
 
 	const preferenceLabel = (field, pref, index) => {
@@ -68,7 +84,6 @@ export const Profile = () => {
 					displayName: profile.displayName,
 					birthday: profile.birthday,
 					gender: profile.gender,
-					avatar: profile.avatar,
 					status: profile.status,
 					location: profile.location,
 					preference: profile.preference,
@@ -77,7 +92,6 @@ export const Profile = () => {
 					displayName: '',
 					birthday: '',
 					gender: '',
-					avatar: '',
 					status: '',
 					location: '',
 					preference: '',
@@ -101,6 +115,7 @@ export const Profile = () => {
 					age,
 					modified: values.time || unix,
 					photoURL: user.photoURL,
+					photo: profile.photo || null,
 					prefCategory,
 				};
 				await firebaseDb.ref(`users/${user.uid}/profile`).set(payload);
