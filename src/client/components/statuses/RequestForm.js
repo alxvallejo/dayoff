@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../context/UserContext';
+import { StatusContext } from '../../context/StatusContext';
 import { Button, Form } from 'react-bootstrap';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
@@ -8,7 +9,8 @@ import { firebaseDb } from '../../services/firebase';
 const moment = require('moment');
 
 export const RequestForm = () => {
-	const [{ user, options, profile, lastStatus }, userDispatch] = useContext(UserContext);
+	const [{ user, options, profile }, userDispatch] = useContext(UserContext);
+	const [{ lastStatus }, statusDispatch] = useContext(StatusContext);
 	const [archive, setArchive] = useState();
 
 	const getArchive = async () => {
@@ -64,6 +66,7 @@ export const RequestForm = () => {
 			} else {
 				const room = options && options.preference === 'Dating' ? profile.prefCategory : 'Hangout';
 				const unix = moment().unix();
+				const lastStatusPath = `statuses/${room}/${user.uid}`;
 				const payload = {
 					...values,
 					uid: user.uid,
@@ -72,8 +75,23 @@ export const RequestForm = () => {
 					time: values.time || unix,
 					photoURL: (profile.photo && profile.photo.thumbnail) || null,
 					room,
+					lastStatusPath,
 				};
-				await firebaseDb.ref(`statuses/${room}/${user.uid}`).set(payload);
+				await firebaseDb.ref(lastStatusPath).set(payload);
+				// update lastStatusPath in your profile
+				const newProfile = {
+					...profile,
+					lastStatusPath,
+				};
+				firebaseDb.ref(`users/${user.uid}/profile`).set(newProfile);
+				userDispatch({
+					type: 'SET_PROFILE',
+					profile: newProfile,
+				});
+				statusDispatch({
+					type: 'SET_LAST_STATUS',
+					lastStatus: payload,
+				});
 			}
 		},
 		enableReinitialize: true,

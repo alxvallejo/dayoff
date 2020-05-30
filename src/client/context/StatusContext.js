@@ -5,6 +5,7 @@ export const StatusContext = React.createContext();
 const initialStatus = {
 	statuses: null,
 	status: null,
+	lastStatus: null,
 	convo: null,
 	convoKey: null,
 };
@@ -20,6 +21,11 @@ const StatusReducer = (state, action) => {
 			return {
 				...state,
 				status: action.status,
+			};
+		case 'SET_LAST_STATUS':
+			return {
+				...state,
+				lastStatus: action.lastStatus,
 			};
 		case 'SET_CONVO':
 			return {

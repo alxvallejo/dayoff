@@ -16,7 +16,7 @@ const moment = require('moment');
 
 export const Dashboard = () => {
 	const [{ user, options, profile, showProfile, loginForm }, userDispatch] = useContext(UserContext);
-	const [{ statuses }, statusDispatch] = useContext(StatusContext);
+	const [{ statuses, lastStatus }, statusDispatch] = useContext(StatusContext);
 
 	useEffect(() => {
 		console.log('profile at dashboard', profile);
@@ -43,6 +43,23 @@ export const Dashboard = () => {
 				});
 			}
 		});
+		if (user && profile) {
+			// USER PRESENCE TRACKING
+			// Assuming user is logged in
+
+			if (room) {
+				const statusRef = firebaseDb.ref(`statuses/${room}/${user.uid}`);
+
+				// Set the /users/:userId value to true
+				statusRef.update({ online: true }).then(() => console.log('Online presence set'));
+
+				// Remove the node whenever the client disconnects
+				statusRef
+					.onDisconnect()
+					.update({ online: false })
+					.then(() => console.log('On disconnect function configured.'));
+			}
+		}
 	}, [profile, options]);
 
 	const showLogin = () => {

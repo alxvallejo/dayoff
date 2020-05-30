@@ -128,7 +128,6 @@ const App = () => {
 								type: 'SET_PROFILE',
 								profile: userInfo.profile,
 							});
-							// Check if photo thumbnail is available
 						}
 						if (userInfo.favorites) {
 							userDispatch({

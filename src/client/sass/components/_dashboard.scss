@@ -9,4 +9,16 @@
 			font-weight: bold;
 		}
 	}
+	.avatar-wrapper {
+		position: relative;
+		.online {
+			width: 13px;
+			background: $green;
+			height: 13px;
+			position: absolute;
+			right: -5px;
+			bottom: 6px;
+			border-radius: 50%;
+		}
+	}
 }

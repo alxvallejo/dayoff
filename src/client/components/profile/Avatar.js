@@ -22,8 +22,15 @@ export const AvatarStatus = ({ status, width }) => {
 	if (!status) {
 		return <div style={{ width: width, height: width }}></div>;
 	}
+	console.log('status.online', status.online);
+	const presenceClass = status.online ? 'online' : '';
 	if (status.photoURL) {
-		return <Image src={status.photoURL} roundedCircle style={{ width: width, height: width }} />;
+		return (
+			<div className="avatar-wrapper">
+				<Image src={status.photoURL} roundedCircle style={{ width: width, height: width }} />
+				<div className={presenceClass} />
+			</div>
+		);
 	} else {
 		return <div style={{ width: width, height: width }}></div>;
 	}
