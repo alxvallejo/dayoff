@@ -110,24 +110,28 @@ export const TopNav = () => {
 		return (
 			<Navbar expand="lg">
 				<div className="container">
-					<Row className="align-items-center">
-						<NavDropdown
-							title={<AvatarCircle profile={profile} width={50} className="img-thumbnail" />}
-							id="basic-nav-dropdown"
-						>
-							<NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
-							<NavDropdown.Item onClick={() => signOut()}>Logout</NavDropdown.Item>
-						</NavDropdown>
-						<Navbar.Collapse id="basic-navbar-nav"></Navbar.Collapse>
-						<a
-							role="href"
-							onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}
-							className="ml-2 mr-3"
-						>
-							Profile
-						</a>
-						{showInbox()}
-					</Row>
+					{profile && (
+						<Row className="align-items-center">
+							<NavDropdown
+								title={<AvatarCircle profile={profile} width={50} className="img-thumbnail" />}
+								id="basic-nav-dropdown"
+							>
+								<NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
+								<NavDropdown.Item onClick={() => signOut()}>Logout</NavDropdown.Item>
+							</NavDropdown>
+							<Navbar.Collapse id="basic-navbar-nav"></Navbar.Collapse>
+
+							<a
+								role="href"
+								onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}
+								className="ml-2 mr-3"
+							>
+								Profile
+							</a>
+
+							{showInbox()}
+						</Row>
+					)}
 					<ToggleMode />
 					{defaultNav()}
 				</div>

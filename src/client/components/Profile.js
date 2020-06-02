@@ -87,6 +87,7 @@ export const Profile = () => {
 					status: profile.status,
 					location: profile.location,
 					preference: profile.preference,
+					agePref: profile.agePref,
 			  }
 			: {
 					displayName: '',
@@ -95,6 +96,7 @@ export const Profile = () => {
 					status: '',
 					location: '',
 					preference: '',
+					agePref: '',
 			  };
 	const formik = useFormik({
 		initialValues,
@@ -180,7 +182,7 @@ export const Profile = () => {
 					<Form.Group>
 						<Form.Label>Birthday</Form.Label>
 						<InputMask
-							mask="99/99/9999"
+							mask="99 / 99 / 9999"
 							name="birthday"
 							onChange={handleChange}
 							value={values.birthday}
@@ -204,6 +206,32 @@ export const Profile = () => {
 						<Form.Label>Status</Form.Label>
 						<Form.Row>{statuses.map((status, index) => preferenceLabel('status', status, index))}</Form.Row>
 					</Form.Group>
+
+					{values.status === 'Single' && (
+						<Form.Row>
+							<Col>
+								<Form.Label>Min</Form.Label>
+								<InputMask
+									mask="99"
+									name="lowerBound"
+									onChange={handleChange}
+									value={values.lowerBound}
+									className="form-control"
+								/>
+							</Col>
+							<Col>to</Col>
+							<Col>
+								<Form.Label>Max</Form.Label>
+								<InputMask
+									mask="99"
+									name="upperBound"
+									onChange={handleChange}
+									value={values.upperBound}
+									className="form-control"
+								/>
+							</Col>
+						</Form.Row>
+					)}
 
 					<Form.Group>
 						<Form.Label>Location</Form.Label>

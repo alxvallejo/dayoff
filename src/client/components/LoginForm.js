@@ -5,6 +5,9 @@ import { UserContext } from '../context/UserContext';
 import { firebaseDb, firebaseAuth } from '../services/firebase';
 import { Button, Form } from 'react-bootstrap';
 import InputMask from 'react-input-mask';
+import { calcAge } from '../utils/user';
+import { AgePrefSelection } from './profile/AgePrefSelection';
+
 // import { string, min, max, matches } from 'yup';
 const moment = require('moment');
 
@@ -39,6 +42,8 @@ export const LoginForm = () => {
 		status: '',
 		location: '',
 		preference: '',
+		ageMin: '',
+		ageMax: '',
 	};
 
 	const validate = (value) => {
@@ -89,7 +94,7 @@ export const LoginForm = () => {
 		validate,
 		onSubmit: async (values) => {
 			const unix = moment().unix();
-			const age = moment().diff(values.birthday, 'years');
+			const age = calcAge(values);
 			const user_payload = {
 				email: values.email,
 				password: values.password,
@@ -115,6 +120,8 @@ export const LoginForm = () => {
 				status: values.status,
 				location: values.location,
 				preference: values.preference,
+				ageMin: values.ageMin,
+				ageMax: values.ageMax,
 			};
 			await firebaseDb.ref(`users/${uid}/profile`).set(profile_payload);
 			userDispatch({
@@ -130,6 +137,16 @@ export const LoginForm = () => {
 	});
 	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
 
+	// Handel Age Range Input
+	const handleAgeRange = (agePrefInput) => {
+		setFieldValue('ageMin', agePrefInput.min);
+		setFieldValue('ageMax', agePrefInput.max);
+	};
+	const agePrefValue = {
+		min: values.ageMin,
+		max: values.ageMax,
+	};
+
 	return (
 		<div>
 			<Form onSubmit={handleSubmit}>
@@ -141,6 +158,11 @@ export const LoginForm = () => {
 					<small id="emailHelp" className="form-text text-muted">
 						We'll never share your email with anyone else.
 					</small>
+				</Form.Group>
+
+				<Form.Group>
+					<Form.Label>Gender</Form.Label>
+					<Form.Row>{genders.map((gender, index) => preferenceLabel('gender', gender, index))}</Form.Row>
 				</Form.Group>
 
 				<Form.Group>
@@ -164,6 +186,18 @@ export const LoginForm = () => {
 					<Form.Label>Username</Form.Label>
 					<Form.Control type="text" name="displayName" onChange={handleChange} value={values.displayName} />
 					{errors.displayName && touched.displayName && errors.displayName}
+					<small id="emailHelp" className="form-text text-muted">
+						You can change this later.
+					</small>
+				</Form.Group>
+
+				<Form.Group>
+					<Form.Label>Location</Form.Label>
+					<Form.Control type="text" name="location" onChange={handleChange} value={values.location} />
+					{errors.location && touched.location && errors.location}
+					<small id="emailHelp" className="form-text text-muted">
+						Show users where you're from.
+					</small>
 				</Form.Group>
 
 				<Form.Group>
@@ -179,25 +213,8 @@ export const LoginForm = () => {
 				</Form.Group>
 
 				<Form.Group>
-					<Form.Label>Gender</Form.Label>
-					<Form.Row>{genders.map((gender, index) => preferenceLabel('gender', gender, index))}</Form.Row>
-				</Form.Group>
-
-				<Form.Group>
 					<Form.Label>Status</Form.Label>
 					<Form.Row>{statuses.map((status, index) => preferenceLabel('status', status, index))}</Form.Row>
-				</Form.Group>
-
-				<Form.Group>
-					<Form.Label>Location</Form.Label>
-					<Form.Control
-						type="text"
-						name="location"
-						onChange={handleChange}
-						value={values.location}
-						className="text-center"
-					/>
-					{errors.location && touched.location && errors.location}
 				</Form.Group>
 
 				<Form.Group>
@@ -206,6 +223,22 @@ export const LoginForm = () => {
 						{preferences.map((preference, index) => preferenceLabel('preference', preference, index))}
 					</Form.Row>
 				</Form.Group>
+
+				{values.status === 'Single' && (
+					<Form.Group>
+						<Form.Label>Interest Range</Form.Label>
+						<AgePrefSelection
+							birthday={values.birthday}
+							agePref={agePrefValue}
+							updateAgePref={handleAgeRange}
+							isDirty={touched.agePref}
+						/>
+						{errors.agePref && touched.agePref && errors.agePref}
+						<small id="emailHelp" className="form-text text-muted">
+							Only views posts within this age range (in Dating mode)
+						</small>
+					</Form.Group>
+				)}
 
 				<Button variant="outline-primary" type="submit" disabled={isSubmitting}>
 					Sign Up

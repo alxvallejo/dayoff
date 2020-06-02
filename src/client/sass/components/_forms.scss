@@ -55,3 +55,11 @@ select {
 		border: 1px solid #d6d3d3;
 	}
 }
+
+.age-range-input {
+	padding: 15px;
+	.input-range__label .input-range__label--value,
+	.input-range__label-container {
+		font-weight: bold;
+	}
+}

@@ -47,7 +47,7 @@ export const Dashboard = () => {
 			// USER PRESENCE TRACKING
 			// Assuming user is logged in
 
-			if (room) {
+			if (room && lastStatus) {
 				const statusRef = firebaseDb.ref(`statuses/${room}/${user.uid}`);
 
 				// Set the /users/:userId value to true
@@ -97,9 +97,8 @@ export const Dashboard = () => {
 	const welcome = () => {
 		return (
 			<div>
-				<h3>Welcome</h3>
-				<p>Dayoff is a chat community where you're allowed one post at a time.</p>
-				{loginForm ? <LoginForm /> : <Button onClick={() => showLoginForm()}>Get started.</Button>}
+				<p style={{ fontSize: 18 }}>The better way to meet people on your day off.</p>
+				{loginForm ? <LoginForm /> : <Button onClick={() => showLoginForm()}>Get Started</Button>}
 			</div>
 		);
 	};
@@ -121,7 +120,7 @@ export const Dashboard = () => {
 	return (
 		<Container>
 			<Row>
-				<Col>{viewLeftPanel()}</Col>
+				<Col className="left-col">{viewLeftPanel()}</Col>
 				<Col className="ml-4">
 					<div>
 						{statuses &&
@@ -137,7 +136,11 @@ export const Dashboard = () => {
 											<Col>
 												<div className="byline">
 													<span>
-														<b>{status.displayName}</b> <i>{displayDate}</i>
+														{status.displayName}
+														{' · '}
+														<span className="text-bold">{status.age}</span>
+														{' · '}
+														<i>{displayDate}</i>
 													</span>
 												</div>
 												<ReactQuill value={status.status} readOnly={true} theme={'bubble'} />
