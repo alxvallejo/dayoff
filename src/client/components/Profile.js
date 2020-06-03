@@ -8,7 +8,7 @@ import { getPrefCategory } from '../utils/User';
 import { AvatarSelection } from './profile/AvatarSelection';
 import { Avatar } from './profile/Avatar';
 import InputMask from 'react-input-mask';
-import { calcAge } from '../utils/user';
+import { calcAge } from '../utils/User';
 import { AgePrefSelection } from './profile/AgePrefSelection';
 
 const moment = require('moment');

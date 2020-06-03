@@ -5,7 +5,7 @@ import { UserContext } from '../context/UserContext';
 import { firebaseDb, firebaseAuth } from '../services/firebase';
 import { Button, Form } from 'react-bootstrap';
 import InputMask from 'react-input-mask';
-import { calcAge } from '../utils/user';
+import { calcAge } from '../utils/User';
 import { AgePrefSelection } from './profile/AgePrefSelection';
 
 // import { string, min, max, matches } from 'yup';
