@@ -89,7 +89,8 @@ export const Dashboard = () => {
 
 		return (
 			<a onClick={() => openChat(status)}>
-				<Badge variant="secondary">Chat</Badge>
+				{/* <Badge variant="secondary">Chat</Badge> */}
+				<i className="text-secondary chat-btn far fa-comment" />
 			</a>
 		);
 	};
@@ -125,6 +126,7 @@ export const Dashboard = () => {
 					<div>
 						{statuses &&
 							statuses.map((status, i) => {
+								console.log('status: ', status);
 								const displayDate = moment.unix(status.time).fromNow();
 
 								return (
@@ -134,14 +136,15 @@ export const Dashboard = () => {
 												<AvatarStatus status={status} width={50} />
 											</Col>
 											<Col>
-												<div className="byline">
+												<div className="byline d-flex justify-content-between">
 													<span>
 														{status.displayName}
 														{' · '}
 														<span className="text-bold">{status.age}</span>
 														{' · '}
-														<i>{displayDate}</i>
+														<span className="text-bold">{status.location}</span>
 													</span>
+													<i>{displayDate}</i>
 												</div>
 												<ReactQuill value={status.status} readOnly={true} theme={'bubble'} />
 												<div>{contactButton(status)}</div>

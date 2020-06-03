@@ -94,7 +94,7 @@ export const LoginForm = () => {
 		validate,
 		onSubmit: async (values) => {
 			const unix = moment().unix();
-			const age = calcAge(values);
+			const age = calcAge(values.birthday);
 			const user_payload = {
 				email: values.email,
 				password: values.password,

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import { UserContext } from '../context/UserContext';
 import { StatusContext } from '../context/StatusContext';
-import { Row, Button, Nav, Navbar, NavDropdown, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
+import { Row, Navbar, Nav, Col, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
 import LinesEllipsis from 'react-lines-ellipsis';
 import { ToggleMode } from './ToggleMode';
 import { AvatarCircle } from './profile/Avatar';
@@ -33,7 +33,7 @@ export const TopNav = () => {
 		return (
 			<div>
 				<div className="d-flex align-self-center">
-					<a href="/" className="navbar-brand mr-0">
+					<a href="/" className="navbar-brand mr-0 align-self-end">
 						Day
 						<Image
 							src="https://img.icons8.com/color/48/000000/beach-ball.png"
@@ -110,30 +110,16 @@ export const TopNav = () => {
 		return (
 			<Navbar expand="lg">
 				<div className="container">
-					{profile && (
-						<Row className="align-items-center">
-							<NavDropdown
-								title={<AvatarCircle profile={profile} width={50} className="img-thumbnail" />}
-								id="basic-nav-dropdown"
-							>
-								<NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
-								<NavDropdown.Item onClick={() => signOut()}>Logout</NavDropdown.Item>
-							</NavDropdown>
-							<Navbar.Collapse id="basic-navbar-nav"></Navbar.Collapse>
-
-							<a
-								role="href"
-								onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}
-								className="ml-2 mr-3"
-							>
-								Profile
-							</a>
-
-							{showInbox()}
+					<Col>
+						<Row>
+							<div className="mr-3">
+								<ToggleMode />
+							</div>
+							{profile && showInbox()}
 						</Row>
-					)}
-					<ToggleMode />
-					{defaultNav()}
+					</Col>
+
+					<Col className="d-flex justify-content-end">{defaultNav()}</Col>
 				</div>
 			</Navbar>
 		);

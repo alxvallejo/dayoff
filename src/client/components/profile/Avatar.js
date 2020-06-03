@@ -31,6 +31,24 @@ export const AvatarStatus = ({ status, width }) => {
 				<div className={presenceClass} />
 			</div>
 		);
+	} else if (status.gender) {
+		if (status.gender === 'Male') {
+			return (
+				<Image
+					src="https://img.icons8.com/dusk/80/000000/person-male.png"
+					roundedCircle
+					style={{ width: width, height: width }}
+				/>
+			);
+		} else if (gender === 'Female') {
+			return (
+				<Image
+					src="https://img.icons8.com/dusk/80/000000/person-female.png"
+					roundedCircle
+					style={{ width: width, height: width }}
+				/>
+			);
+		}
 	} else {
 		return <div style={{ width: width, height: width }}></div>;
 	}

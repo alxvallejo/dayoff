@@ -6,6 +6,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import { useFormik } from 'formik';
 import { firebaseDb } from '../../services/firebase';
+import { AvatarCircle } from '../profile/Avatar';
 const moment = require('moment');
 
 export const RequestForm = () => {
@@ -45,6 +46,7 @@ export const RequestForm = () => {
 				lastStatus: null,
 			});
 			firebaseDb.ref(`users/${user.uid}/profile`).update({ lastStatusPath: null });
+			setQueueRemove(null);
 		}
 	};
 
@@ -98,6 +100,7 @@ export const RequestForm = () => {
 					uid: user.uid,
 					displayName: profile.displayName,
 					age: profile.age,
+					gender: profile.gender,
 					time: unix,
 					photoURL: (profile.photo && profile.photo.thumbnail) || null,
 					room,
@@ -131,7 +134,7 @@ export const RequestForm = () => {
 		}
 		const showStat = (lbl, stat) => {
 			return (
-				<Col>
+				<Col xs={4}>
 					<Form.Label>{lbl}</Form.Label>
 					<div className="stat">{stat}</div>
 				</Col>
@@ -142,20 +145,18 @@ export const RequestForm = () => {
 			return queueRemove ? (
 				<Col>
 					<Form.Label>Are you sure?</Form.Label>
-					<Row>
-						<Button variant="danger" onClick={() => removeStatus()}>
+					<Row className="ml-1">
+						<a className="text-danger mr-2" onClick={() => removeStatus()}>
 							Delete
-						</Button>
-						<Button variant="info" onClick={() => setQueueRemove(false)}>
+						</a>
+						<a className="text-info" onClick={() => setQueueRemove(false)}>
 							Cancel
-						</Button>
+						</a>
 					</Row>
 				</Col>
 			) : (
 				<Col>
-					<Form.Label onClick={() => setQueueRemove(true)} disabled={queueRemove}>
-						Delete
-					</Form.Label>
+					<a onClick={() => setQueueRemove(true)}>Delete</a>
 				</Col>
 			);
 		};
@@ -164,9 +165,9 @@ export const RequestForm = () => {
 		const timeToExpiration = expiration.diff(moment(), 'hours');
 
 		return (
-			<div className="mb-4">
+			<div className="mb-4 d-flex flex-column justify-content-center">
 				<Form.Label>Stats</Form.Label>
-				<Row>
+				<Row className=" d-flex justify-content-center">
 					{showStat('Likes', status.likes || 0)}
 					{showStat('Expires', lastStatus ? timeToExpiration + 1 + ' hours' : '')}
 					{deleteButton()}
@@ -178,31 +179,51 @@ export const RequestForm = () => {
 
 	return (
 		<div>
-			<h3>Enjoy your Dayoff.</h3>
+			<Row>
+				<Col>
+					<h3>Your status.</h3>
+				</Col>
+				<Col className="d-flex justify-content-end">
+					<a role="href" onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}>
+						Edit Profile
+					</a>
+				</Col>
+			</Row>
+
+			<Row className="align-items-center mb-3">
+				<Col xs={3} className="d-flex flex-column align-items-center">
+					<AvatarCircle profile={profile} width={50} className="img-thumbnail" />
+				</Col>
+				<Col>
+					<Form onSubmit={handleSubmit} inline>
+						<Form.Group className="flex-grow-1">
+							<ReactQuill
+								ref={statusInput}
+								theme="bubble"
+								name="status"
+								value={values.status || ''}
+								onChange={(e) => setFieldValue('status', e)}
+								placeholder={``}
+								className="status-input flex-grow-1 mr-3"
+							/>
+							{errors.status && touched.status && errors.status}
+						</Form.Group>
+
+						<Button variant="outline-primary" type="submit" disabled={isSubmitting}>
+							Post
+						</Button>
+					</Form>
+				</Col>
+			</Row>
+
 			{errors.profile && touched.status}
+
+			<Row>
+				<Col>{statusStats(lastStatus)}</Col>
+			</Row>
 
 			<div>
 				<p>One status allowed at a time. Statuses expire in 24 hours.</p>
-				<Form onSubmit={handleSubmit}>
-					<Form.Group>{statusStats(lastStatus)}</Form.Group>
-					<Form.Group>
-						<Form.Label>Your status</Form.Label>
-						<ReactQuill
-							ref={statusInput}
-							theme="bubble"
-							name="status"
-							value={values.status || ''}
-							onChange={(e) => setFieldValue('status', e)}
-							placeholder={``}
-							className="status-input"
-						/>
-						{errors.status && touched.status && errors.status}
-					</Form.Group>
-
-					<Button variant="outline-primary" type="submit" disabled={isSubmitting}>
-						Post
-					</Button>
-				</Form>
 			</div>
 		</div>
 	);

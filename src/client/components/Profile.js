@@ -8,6 +8,9 @@ import { getPrefCategory } from '../utils/User';
 import { AvatarSelection } from './profile/AvatarSelection';
 import { Avatar } from './profile/Avatar';
 import InputMask from 'react-input-mask';
+import { calcAge } from '../utils/user';
+import { AgePrefSelection } from './profile/AgePrefSelection';
+
 const moment = require('moment');
 
 const genders = ['Male', 'Female'];
@@ -87,7 +90,8 @@ export const Profile = () => {
 					status: profile.status,
 					location: profile.location,
 					preference: profile.preference,
-					agePref: profile.agePref,
+					ageMin: profile.ageMin,
+					ageMax: profile.ageMax,
 			  }
 			: {
 					displayName: '',
@@ -96,7 +100,8 @@ export const Profile = () => {
 					status: '',
 					location: '',
 					preference: '',
-					agePref: '',
+					ageMin: '',
+					ageMax: '',
 			  };
 	const formik = useFormik({
 		initialValues,
@@ -110,12 +115,12 @@ export const Profile = () => {
 			} else {
 				const unix = moment().unix();
 				const prefCategory = getPrefCategory(values);
-				const age = moment().diff(values.birthday, 'years');
+				const age = calcAge(values.birthday);
 				const payload = {
 					...values,
 					uid: user.uid,
 					age,
-					modified: values.time || unix,
+					modified: unix,
 					photoURL: user.photoURL,
 					photo: profile.photo || null,
 					prefCategory,
@@ -131,6 +136,16 @@ export const Profile = () => {
 		enableReinitialize: true,
 	});
 	const { handleChange, handleSubmit, values, setFieldValue, errors, touched, isSubmitting } = formik;
+
+	// Handel Age Range Input
+	const handleAgeRange = (agePrefInput) => {
+		setFieldValue('ageMin', agePrefInput.min);
+		setFieldValue('ageMax', agePrefInput.max);
+	};
+	const agePrefValue = {
+		min: values.ageMin,
+		max: values.ageMax,
+	};
 
 	const controlClass = ''; // text-center
 	const formClass = ''; // d-flex flex-column align-items-center justify-content-center text-center
@@ -148,6 +163,7 @@ export const Profile = () => {
 
 	return (
 		<div>
+			<a onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: false })}>Back</a>
 			<div>
 				<Form onSubmit={handleSubmit}>
 					{/* <h3>Set your profile.</h3> */}
@@ -208,29 +224,19 @@ export const Profile = () => {
 					</Form.Group>
 
 					{values.status === 'Single' && (
-						<Form.Row>
-							<Col>
-								<Form.Label>Min</Form.Label>
-								<InputMask
-									mask="99"
-									name="lowerBound"
-									onChange={handleChange}
-									value={values.lowerBound}
-									className="form-control"
-								/>
-							</Col>
-							<Col>to</Col>
-							<Col>
-								<Form.Label>Max</Form.Label>
-								<InputMask
-									mask="99"
-									name="upperBound"
-									onChange={handleChange}
-									value={values.upperBound}
-									className="form-control"
-								/>
-							</Col>
-						</Form.Row>
+						<Form.Group>
+							<Form.Label>Interest Range</Form.Label>
+							<AgePrefSelection
+								birthday={values.birthday}
+								agePref={agePrefValue}
+								updateAgePref={handleAgeRange}
+								isDirty={touched.agePref}
+							/>
+							{errors.agePref && touched.agePref && errors.agePref}
+							<small id="emailHelp" className="form-text text-muted">
+								Only views posts within this age range (in Dating mode)
+							</small>
+						</Form.Group>
 					)}
 
 					<Form.Group>
