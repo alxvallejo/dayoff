@@ -48,6 +48,8 @@ export const MessageInput = ({ status }) => {
 			let newConvoInfo;
 
 			if (convo) {
+				let yourStatus = convo.statusUid === user.uid;
+
 				newConvoInfo = {
 					...convo,
 					time: unix,
@@ -55,17 +57,44 @@ export const MessageInput = ({ status }) => {
 					message: values.message,
 					lastDisplayName: profile.displayName,
 				};
+
+				// update if necessary
+				if (yourStatus) {
+					newConvoInfo = {
+						...newConvoInfo,
+						status: {
+							...newConvoInfo.status,
+							statusPhoto: (profile.photo && profile.photo.thumbnail) || null,
+						},
+					};
+				} else {
+					newConvoInfo = {
+						...newConvoInfo,
+						reply: {
+							...newConvoInfo.reply,
+							replyPhoto: (profile.photo && profile.photo.thumbnail) || null,
+						},
+					};
+				}
 			} else {
 				newConvoInfo = {
 					key: convoKey,
 					room: status.room,
-					statusID: status.key,
 					statusUid: status.uid,
-					statusDisplayName: status.displayName,
-					statusPhoto: status.photoURL || null,
+					status: {
+						statusID: status.key,
+						statusDisplayName: status.displayName,
+						statusPhoto: status.photoURL || null,
+						statusAge: status.age,
+						statusLocation: status.location,
+					},
 					replyUid: user.uid,
-					replyDisplayName: profile.displayName,
-					replyPhoto: user.photoURL || null,
+					reply: {
+						replyDisplayName: profile.displayName,
+						replyPhoto: (profile.photo && profile.photo.thumbnail) || null,
+						replyAge: profile.age,
+						replyLocation: profile.location,
+					},
 					time: unix,
 					lastUid: user.uid,
 					message: values.message,

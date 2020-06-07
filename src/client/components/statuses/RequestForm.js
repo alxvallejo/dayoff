@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { UserContext } from '../../context/UserContext';
 import { StatusContext } from '../../context/StatusContext';
-import { Row, Col, Button, Form, Modal } from 'react-bootstrap';
+import { Row, Col, Button, Form } from 'react-bootstrap';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import { useFormik } from 'formik';
 import { firebaseDb } from '../../services/firebase';
 import { AvatarCircle } from '../profile/Avatar';
+import { Inbox } from './Inbox';
 const moment = require('moment');
 
 export const RequestForm = () => {
@@ -181,7 +182,7 @@ export const RequestForm = () => {
 		<div>
 			<Row>
 				<Col>
-					<h3>Your status.</h3>
+					<h3>{profile && profile.displayName}</h3>
 				</Col>
 				<Col className="d-flex justify-content-end">
 					<a role="href" onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}>
@@ -225,6 +226,8 @@ export const RequestForm = () => {
 			<div>
 				<p>One status allowed at a time. Statuses expire in 24 hours.</p>
 			</div>
+
+			<Inbox />
 		</div>
 	);
 };

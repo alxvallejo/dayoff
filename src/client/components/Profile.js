@@ -6,7 +6,7 @@ import { firebaseDb, storageRef } from '../services/firebase';
 import { UserContext } from '../context/UserContext';
 import { getPrefCategory } from '../utils/User';
 import { AvatarSelection } from './profile/AvatarSelection';
-import { Avatar } from './profile/Avatar';
+import { AvatarProfile } from './profile/Avatar';
 import InputMask from 'react-input-mask';
 import { calcAge } from '../utils/User';
 import { AgePrefSelection } from './profile/AgePrefSelection';
@@ -170,7 +170,7 @@ export const Profile = () => {
 					<Form.Group>
 						<Form.Label>Profile Photo</Form.Label>
 						<Col xs={6} md={4}>
-							<Avatar profile={profile} />
+							<AvatarProfile profile={profile} />
 						</Col>
 
 						<Form.Control

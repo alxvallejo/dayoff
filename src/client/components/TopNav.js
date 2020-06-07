@@ -5,7 +5,6 @@ import { StatusContext } from '../context/StatusContext';
 import { Row, Navbar, Nav, Col, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
 import LinesEllipsis from 'react-lines-ellipsis';
 import { ToggleMode } from './ToggleMode';
-import { AvatarCircle } from './profile/Avatar';
 
 import { firebaseAuth } from '../services/firebase';
 

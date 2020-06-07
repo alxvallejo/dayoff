@@ -17,13 +17,13 @@ import { AdminDash } from './components/admin';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { Message } from './components/statuses/Message';
 import { MessageInput } from './components/statuses/MessageInput';
-import { Profile } from './components/Profile';
+import { Avatar } from './components/profile/Avatar';
 
 import { firebaseAuth, firebaseDb } from './services/firebase';
 
 const App = () => {
 	const [{ user, profile, showProfile, showLogin }, userDispatch] = useContext(UserContext);
-	const [{ status }, statusDispatch] = useContext(StatusContext);
+	const [{ status, convo }, statusDispatch] = useContext(StatusContext);
 	const [loading, setLoading] = useState(true);
 	const [isAdmin, setIsAdmin] = useState();
 
@@ -188,6 +188,52 @@ const App = () => {
 		userDispatch({ type: 'SHOW_LOGIN', showLogin: false });
 	};
 
+	const convoPhoto = () => {
+		if (!status || !convo) {
+			return <span />;
+		}
+		let yourStatus = user.uid === convo.statusUid;
+		let avatarPhoto = yourStatus ? convo.reply.replyPhoto : convo.status.statusPhoto;
+		return (
+			<div className="mr-2">
+				<Avatar photoURL={avatarPhoto} width={50} />
+			</div>
+		);
+	};
+
+	const convoDisplayName = () => {
+		if (!status || !convo) {
+			return <span />;
+		}
+		let yourStatus = user.uid === convo.statusUid;
+		return yourStatus ? convo.reply.replyDisplayName : convo.status.statusDisplayName;
+	};
+
+	const convoHeader = () => {
+		if (!status || !convo) {
+			return <span />;
+		}
+		let yourStatus = user.uid === convo.statusUid;
+		const fontSize = 11;
+		if (yourStatus) {
+			return (
+				<div style={{ fontSize }}>
+					{convo.reply.replyAge}
+					{' · '}
+					{convo.reply.replyLocation}
+				</div>
+			);
+		} else {
+			return (
+				<div style={{ fontSize }}>
+					{convo.status.statusAge}
+					{' · '}
+					{convo.status.statusLocation}
+				</div>
+			);
+		}
+	};
+
 	return (
 		<BrowserRouter>
 			<TopNav />
@@ -222,7 +268,15 @@ const App = () => {
 				scrollable
 			>
 				<Modal.Header closeButton>
-					<Modal.Title>{`Chat with ${status && status.displayName}`}</Modal.Title>
+					<Modal.Title>
+						<div className="d-flex align-items-end">
+							{convoPhoto()}
+							<div>
+								{` Chat with ${convoDisplayName()}`}
+								{convoHeader()}
+							</div>
+						</div>
+					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<Message status={status} />

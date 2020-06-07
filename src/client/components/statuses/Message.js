@@ -145,20 +145,18 @@ export const Message = ({ status }) => {
 
 	return (
 		<ScrollToBottom>
-			<Col>
-				<div className="mb-3">
-					{displayInitialstatus()}
-					{messages &&
-						messages.map((message, i) => {
-							return (
-								<div key={i} className="py-3">
-									{displayMessage(message, i)}
-								</div>
-							);
-						})}
-				</div>
-				<div hidden ref={lastMsg} />
-			</Col>
+			<div className="mb-3">
+				{displayInitialstatus()}
+				{messages &&
+					messages.map((message, i) => {
+						return (
+							<div key={i} className="py-3">
+								{displayMessage(message, i)}
+							</div>
+						);
+					})}
+			</div>
+			<div hidden ref={lastMsg} />
 		</ScrollToBottom>
 	);
 };

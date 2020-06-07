@@ -54,7 +54,7 @@ export const AvatarStatus = ({ status, width }) => {
 	}
 };
 
-export const Avatar = ({ profile }) => {
+export const AvatarProfile = ({ profile }) => {
 	if (!profile) {
 		return <div></div>;
 	}
@@ -68,4 +68,13 @@ export const Avatar = ({ profile }) => {
 		return <Image src="https://img.icons8.com/dusk/80/000000/person-female.png" rounded />;
 	}
 	return <div></div>;
+};
+
+export const Avatar = ({ photoURL, width }) => {
+	if (!photoURL) {
+		return <div></div>;
+	}
+	if (photoURL) {
+		return <Image src={photoURL} rounded style={{ width: width, height: width }} />;
+	}
 };
