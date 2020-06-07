@@ -27,7 +27,7 @@ export const AvatarStatus = ({ status, width }) => {
 	if (status.photoURL) {
 		return (
 			<div className="avatar-wrapper">
-				<Image src={status.photoURL} roundedCircle style={{ width: width, height: width }} />
+				<Image src={status.photoURL} roundedCircle style={{ width: width, height: width, flex: '1 0 auto' }} />
 				<div className={presenceClass} />
 			</div>
 		);
@@ -37,7 +37,7 @@ export const AvatarStatus = ({ status, width }) => {
 				<Image
 					src="https://img.icons8.com/dusk/80/000000/person-male.png"
 					roundedCircle
-					style={{ width: width, height: width }}
+					style={{ width: width, height: width, flex: '1 0 auto' }}
 				/>
 			);
 		} else if (gender === 'Female') {
@@ -45,7 +45,7 @@ export const AvatarStatus = ({ status, width }) => {
 				<Image
 					src="https://img.icons8.com/dusk/80/000000/person-female.png"
 					roundedCircle
-					style={{ width: width, height: width }}
+					style={{ width: width, height: width, flex: '1 0 auto' }}
 				/>
 			);
 		}

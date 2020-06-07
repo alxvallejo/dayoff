@@ -106,6 +106,8 @@ export const RequestForm = () => {
 					photoURL: (profile.photo && profile.photo.thumbnail) || null,
 					room,
 					location: profile.location,
+					userStatus: profile.status,
+					prefCategory: profile.prefCategory,
 					lastStatusPath,
 				};
 				await firebaseDb.ref(lastStatusPath).set(payload);

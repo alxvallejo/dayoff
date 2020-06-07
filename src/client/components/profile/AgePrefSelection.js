@@ -2,7 +2,7 @@ import React from 'react';
 
 import InputRange from 'react-input-range';
 import 'react-input-range/lib/css/index.css';
-import { calcAge } from '../../utils/user';
+import { calcAge } from '../../utils/User';
 
 export const AgePrefSelection = ({ birthday, agePref, updateAgePref }) => {
 	const defaultVal = { min: 18, max: 50 };

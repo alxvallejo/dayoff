@@ -163,7 +163,10 @@ export const Profile = () => {
 
 	return (
 		<div>
-			<a onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: false })}>Back</a>
+			<div className="mb-3 d-flex justify-content-between">
+				<h2>Edit Profile</h2>
+				<Button onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: false })}>Back</Button>
+			</div>
 			<div>
 				<Form onSubmit={handleSubmit}>
 					{/* <h3>Set your profile.</h3> */}

@@ -209,6 +209,41 @@ const App = () => {
 		return yourStatus ? convo.reply.replyDisplayName : convo.status.statusDisplayName;
 	};
 
+	const viewPrefCategory = () => {
+		if (!status || !convo) {
+			return <span />;
+		}
+		let yourStatus = user.uid === convo.statusUid;
+		let otherPersonStatus = yourStatus ? convo.reply.replyUserStatus : convo.status.statusUserStatus;
+		let otherPersonPrefCategory = yourStatus ? convo.reply.replyPrefCategory : convo.status.statusPrefCategory;
+		if (convo.room === 'Hangout') {
+			if (otherPersonStatus === 'Single') {
+				return (
+					<span>
+						Hangout{' · '}
+						Single{' · '}
+						{otherPersonPrefCategory}
+					</span>
+				);
+			} else {
+				return (
+					<span>
+						Hangout{' · '}
+						Taken{' · '}
+						{otherPerson.gender}
+					</span>
+				);
+			}
+		} else {
+			return (
+				<span>
+					Dating{' · '}
+					{otherPersonPrefCategory}
+				</span>
+			);
+		}
+	};
+
 	const convoHeader = () => {
 		if (!status || !convo) {
 			return <span />;
@@ -217,18 +252,22 @@ const App = () => {
 		const fontSize = 11;
 		if (yourStatus) {
 			return (
-				<div style={{ fontSize }}>
+				<div style={{ fontSize }} className="text-bold">
 					{convo.reply.replyAge}
 					{' · '}
 					{convo.reply.replyLocation}
+					{' · '}
+					{viewPrefCategory()}
 				</div>
 			);
 		} else {
 			return (
-				<div style={{ fontSize }}>
+				<div style={{ fontSize }} className="text-bold">
 					{convo.status.statusAge}
 					{' · '}
 					{convo.status.statusLocation}
+					{' · '}
+					{viewPrefCategory()}
 				</div>
 			);
 		}
