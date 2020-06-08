@@ -5,6 +5,7 @@ import { StatusContext } from '../context/StatusContext';
 import { Row, Navbar, Nav, Col, Image, Modal, OverlayTrigger, Popover, Badge } from 'react-bootstrap';
 import LinesEllipsis from 'react-lines-ellipsis';
 import { ToggleMode } from './ToggleMode';
+import { AvatarCircle } from './profile/Avatar';
 
 import { firebaseAuth } from '../services/firebase';
 
@@ -109,16 +110,17 @@ export const TopNav = () => {
 		return (
 			<Navbar expand="lg">
 				<div className="container">
-					<Col>
-						<Row>
-							<div className="mr-3">
-								<ToggleMode />
-							</div>
-							{profile && showInbox()}
-						</Row>
+					<Col className="d-flex justify-content-center position-relative">
+						{defaultNav()}
+						<div className="ml-3">
+							<ToggleMode />
+						</div>
+						{profile && showInbox()}
+						<div className="position-absolute d-flex" style={{ right: 0, top: 10 }}>
+							<h3>{profile && profile.displayName}</h3>
+							<i className="fas fa-sign-out-alt ml-2" onClick={() => signOut()} />
+						</div>
 					</Col>
-
-					<Col className="d-flex justify-content-end">{defaultNav()}</Col>
 				</div>
 			</Navbar>
 		);

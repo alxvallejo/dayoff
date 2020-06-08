@@ -43,7 +43,7 @@ export const Inbox = () => {
 					console.log('inboxMsg: ', inboxMsg);
 					let yourStatus = user.uid === inboxMsg.statusUid;
 					let avatarPhoto = yourStatus ? inboxMsg.reply.replyPhoto : inboxMsg.status.statusPhoto;
-					let gender = yourStatus ? inboxMsg.reply.gender : inboxMsg.status.gender;
+					let gender = yourStatus ? inboxMsg.reply.replyGender : inboxMsg.status.statusGender;
 					const displayDate = moment.unix(inboxMsg.time).fromNow();
 					return (
 						<div key={i} className="inbox-message main">

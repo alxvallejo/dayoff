@@ -183,9 +183,9 @@ export const RequestForm = () => {
 	return (
 		<div>
 			<Row>
-				<Col>
+				{/* <Col>
 					<h3>{profile && profile.displayName}</h3>
-				</Col>
+				</Col> */}
 				<Col className="d-flex justify-content-end">
 					<a role="href" onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}>
 						Edit Profile
