@@ -8,6 +8,7 @@ import { RequestForm } from './statuses/RequestForm';
 import { LoginForm } from './LoginForm';
 import { Profile } from './Profile';
 import { AvatarStatus } from './profile/Avatar';
+import { ToggleMode } from './ToggleMode';
 
 import { firebaseDb } from '../services/firebase';
 import { map, keys, orderBy } from 'lodash';
@@ -138,6 +139,9 @@ export const Dashboard = () => {
 			<Row>
 				<Col className="left-col">{viewLeftPanel()}</Col>
 				<Col className="ml-4">
+					<div>
+						<ToggleMode />
+					</div>
 					<div>
 						{statuses &&
 							statuses.map((status, i) => {

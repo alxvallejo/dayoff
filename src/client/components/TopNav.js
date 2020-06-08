@@ -47,6 +47,9 @@ export const TopNav = () => {
 	};
 
 	const inboxOverlay = () => {
+		if (!inbox) {
+			return <div />;
+		}
 		const selectMsg = async (inboxMsg) => {
 			const foundstatus = statuses.find((x) => x.uid === inboxMsg.statusUid);
 			if (!foundstatus) {
@@ -76,20 +79,22 @@ export const TopNav = () => {
 	};
 
 	const showInbox = () => {
-		if (!inbox) {
-			return null;
-		}
-		const inboxCount = inbox.filter((x) => x.read == false).length;
-		if (inboxCount < 1) {
-			return null;
-		}
+		// if (!inbox) {
+		// 	return null;
+		// }
+		const inboxCount = inbox ? inbox.filter((x) => x.read == false).length : 0;
+		// if (inboxCount < 1) {
+		// 	return null;
+		// }
 		return (
 			<OverlayTrigger trigger="click" key="inbox" placement="bottom" overlay={inboxOverlay()} rootClose={true}>
 				<div className="inbox-button mt-3">
 					<i className="fas fa-inbox" />
-					<Badge pill variant="secondary" className="inbox-count">
-						{inboxCount}
-					</Badge>
+					{inboxCount > 0 && (
+						<Badge pill variant="secondary" className="inbox-count">
+							{inboxCount}
+						</Badge>
+					)}
 				</div>
 			</OverlayTrigger>
 		);
@@ -111,14 +116,19 @@ export const TopNav = () => {
 			<Navbar expand="lg">
 				<div className="container">
 					<Col className="d-flex justify-content-center position-relative">
-						{defaultNav()}
-						<div className="ml-3">
-							<ToggleMode />
+						<div className="position-absolute d-flex" style={{ left: 0, top: -5 }}>
+							{profile && showInbox()}
 						</div>
-						{profile && showInbox()}
+						{defaultNav()}
+						{/* <div className="ml-3">
+							<ToggleMode />
+						</div> */}
+
 						<div className="position-absolute d-flex" style={{ right: 0, top: 10 }}>
-							<h3>{profile && profile.displayName}</h3>
-							<i className="fas fa-sign-out-alt ml-2" onClick={() => signOut()} />
+							<a role="href" onClick={() => userDispatch({ type: 'SHOW_PROFILE', showProfile: true })}>
+								{profile && profile.displayName}
+							</a>
+							<i className="fas fa-sign-out-alt ml-2 pt-1" onClick={() => signOut()} />
 						</div>
 					</Col>
 				</div>
