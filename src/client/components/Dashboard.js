@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import { StatusContext } from '../context/StatusContext';
-import { Image, Row, Col, Badge, Container, Form, Button, Modal } from 'react-bootstrap';
+import { Media, Row, Col, Badge, Container, Form, Button, Modal } from 'react-bootstrap';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import { RequestForm } from './statuses/RequestForm';
@@ -17,6 +17,37 @@ const moment = require('moment');
 export const Dashboard = () => {
 	const [{ user, options, profile, showProfile, loginForm }, userDispatch] = useContext(UserContext);
 	const [{ statuses, lastStatus }, statusDispatch] = useContext(StatusContext);
+
+	const setLastStatusPresence = async () => {
+		const room =
+			options && options.preference === 'Dating' && profile && profile.prefCategory ? profile.pref : 'Hangout';
+		console.log('room: ', room);
+		if (user && profile) {
+			// USER PRESENCE TRACKING
+			// Assuming user is logged in
+			let loadedLastStatus;
+			if (!lastStatus && profile.lastStatusPath) {
+				const resp = await firebaseDb.ref(profile.lastStatusPath).once('value');
+				loadedLastStatus = resp.val();
+			} else {
+				loadedLastStatus = lastStatus;
+			}
+			console.log('loadedLastStatus: ', loadedLastStatus);
+
+			if (room && loadedLastStatus) {
+				const statusRef = firebaseDb.ref(`statuses/${room}/${user.uid}`);
+
+				// Set the /users/:userId value to true
+				statusRef.update({ online: true }).then(() => console.log('Online presence set'));
+
+				// Remove the node whenever the client disconnects
+				statusRef
+					.onDisconnect()
+					.update({ online: false })
+					.then(() => console.log('On disconnect function configured.'));
+			}
+		}
+	};
 
 	useEffect(() => {
 		console.log('profile at dashboard', profile);
@@ -43,23 +74,7 @@ export const Dashboard = () => {
 				});
 			}
 		});
-		if (user && profile) {
-			// USER PRESENCE TRACKING
-			// Assuming user is logged in
-
-			if (room && lastStatus) {
-				const statusRef = firebaseDb.ref(`statuses/${room}/${user.uid}`);
-
-				// Set the /users/:userId value to true
-				statusRef.update({ online: true }).then(() => console.log('Online presence set'));
-
-				// Remove the node whenever the client disconnects
-				statusRef
-					.onDisconnect()
-					.update({ online: false })
-					.then(() => console.log('On disconnect function configured.'));
-			}
-		}
+		setLastStatusPresence();
 	}, [profile, options]);
 
 	const showLogin = () => {
@@ -131,11 +146,9 @@ export const Dashboard = () => {
 
 								return (
 									<div className="status-listing mb-3" key={i}>
-										<Row>
-											<Col className="mr-2" xs={3} className="d-flex justify-content-end">
-												<AvatarStatus status={status} width={50} />
-											</Col>
-											<Col>
+										<Media>
+											<AvatarStatus status={status} width={50} />
+											<Media.Body className="ml-3">
 												<div className="byline d-flex justify-content-between">
 													<span>
 														{status.displayName}
@@ -148,8 +161,8 @@ export const Dashboard = () => {
 												</div>
 												<ReactQuill value={status.status} readOnly={true} theme={'bubble'} />
 												<div>{contactButton(status)}</div>
-											</Col>
-										</Row>
+											</Media.Body>
+										</Media>
 									</div>
 								);
 							})}
